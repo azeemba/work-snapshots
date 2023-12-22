@@ -7,12 +7,11 @@ const { ref, inView } = useInView({
     triggerOnce: true,  // image will load once and won't unload
 });
 
-let processesTable;
-    processesTable = session.processes.map((proc, index) => (
-        <tr key={index}>
+let border = "divide-y-2"
+let processesTable = session.processes.map((proc, index) => (
+        <tr key={index} className={`${proc.active ? "bg-sky-800" : ""} ${border}`}>
             <td>{proc.process}</td>
             <td>{proc.title}</td>
-            <td>{proc.active.toString()}</td>
         </tr>
     ));
 
@@ -28,7 +27,6 @@ return (
                     <tr>
                         <th>Process</th>
                         <th>Title</th>
-                        <th>Active</th>
                     </tr>
                 </thead>
                 <tbody>
