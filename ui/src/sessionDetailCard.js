@@ -17,7 +17,7 @@ let processesTable;
     ));
 
 return (
-    <div className="p-4 bg-gray-900 rounded shadow-md flex flex-row text-white" ref={ref}>
+    <div className="p-4 bg-gray-900 rounded shadow-md flex flex-col md:flex-row text-white" ref={ref}>
        <div className="flex-1">
             {inView ? <img  src={session.image} alt="Session Detail"/> : null}
         </div>
