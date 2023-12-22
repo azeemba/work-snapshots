@@ -2,6 +2,7 @@ import csv
 from datetime import datetime, timedelta
 from dataclasses import dataclass
 from collections import defaultdict
+from pathlib import Path
 import time
 
 from typing import Any
@@ -26,11 +27,13 @@ class WorkSession:
     end: datetime
     duration: timedelta
     preferred_title: str
+    preferred_image: str
     snapshots: Snapshots
 
     @staticmethod
     def pickTitle(snapshots: Snapshots) -> str:
         # choose window most active
+        # Assumes that title don't change for important activity
         active_counts = defaultdict(int)
         for processes in snapshots.values():
             for p in processes:
@@ -44,7 +47,20 @@ class WorkSession:
                 max_count = count
                 max_title = title
         return max_title
+    
+    @staticmethod
+    def pickImageTimestamp(snapshots: Snapshots, mostActiveTitle: str) -> str:
+        timesteps = list(snapshots.keys())
+        mid = len(timesteps)//2
+        for i in range(mid, 0, -1):
+            # start in the middle
+            # and look for a timestep where mostActiveTitle is active
+            processes = snapshots[timesteps[i]]
+            for p in processes:
+                if p.title == mostActiveTitle and p.isActive:
+                    return p.timestamp_original
 
+        return ""
 
 WorkSessionsDict = dict[tuple[datetime, datetime], WorkSession]
 
@@ -60,7 +76,7 @@ def prep(filepath, config=None) -> WorkSessionsDict:
     return sessions
 
 
-def makeSessionsSummary(workSessions: WorkSessionsDict):
+def makeSessionSummaryForFrontend(workSessions: WorkSessionsDict):
     lightSessions = []
     for (start, end), w in workSessions.items():
         lightSessions.append(
@@ -68,8 +84,10 @@ def makeSessionsSummary(workSessions: WorkSessionsDict):
                 "id": w.identifier,
                 "start": w.start.timestamp(),
                 "end": w.end.timestamp(),
-                "duration_minutes": w.duration.total_seconds()/60,
+                "display_time": w.start.strftime("%b %d, %Y %I:%M %p"),
+                "duration_minutes": w.duration.total_seconds() / 60,
                 "title": w.preferred_title,
+                "image": f"/image/{w.preferred_image}.webp"
             }
         )
     lightSessions.sort(key=lambda x: x["start"], reverse=True)
@@ -116,17 +134,25 @@ def groupIntoSessions(groupedByTime: Snapshots, config=None) -> WorkSessionsDict
     last_timestamp = datetime.min
     current_session: Snapshots = {}
     count = 0
+
+    def make_work_session():
+        # We lambda capture a whole bunch of things but we need to
+        # because we need to use it in the for loop AND outside the for loop
+        title = WorkSession.pickTitle(current_session)
+        return WorkSession(
+            count,
+            start_timestamp,
+            last_timestamp,
+            last_timestamp - start_timestamp,
+            title,
+            WorkSession.pickImageTimestamp(current_session, title),
+            current_session,
+        )
+
     for timestamp in groupedByTime.keys():
         if (timestamp - last_timestamp) > timeout_delta:
-            if (start_timestamp != datetime.min):
-                workSess = WorkSession(
-                    count,
-                    start_timestamp,
-                    last_timestamp,
-                    last_timestamp - start_timestamp,
-                    WorkSession.pickTitle(current_session),
-                    current_session,
-                )
+            if start_timestamp != datetime.min:
+                workSess = make_work_session()
                 sessions[(start_timestamp, last_timestamp)] = workSess
             start_timestamp = timestamp
             last_timestamp = timestamp
@@ -136,14 +162,7 @@ def groupIntoSessions(groupedByTime: Snapshots, config=None) -> WorkSessionsDict
             current_session[timestamp] = groupedByTime[timestamp]
             last_timestamp = timestamp
 
-    sessions[(start_timestamp, last_timestamp)] = WorkSession(
-        count,
-        start_timestamp,
-        last_timestamp,
-        last_timestamp - start_timestamp,
-        WorkSession.pickTitle(current_session),
-        current_session,
-    )
+    sessions[(start_timestamp, last_timestamp)] = make_work_session()
     print(
         f"Took {(time.monotonic_ns() - start)/1e9} seconds to group all data ({len(sessions)} sessions)"
     )
