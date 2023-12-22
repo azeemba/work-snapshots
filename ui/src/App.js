@@ -1,25 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import 'tailwindcss/tailwind.css'
 
-import SessionCard from './session';
+import SessionCard from './sessionCard';
 
 
 function App() {
-  /*
-    const sessions = [
-    {
-      preview: 'preview1.jpg',
-      title: 'Visual Studio Code Session',
-      dateRange: 'Dec 09, 2023, 20:07 - 21:07',
-    },
-    {
-      preview: 'preview2.jpg',
-      title: 'Firefox Session',
-      dateRange: 'Dec 10, 2023, 10:00 - 11:00',
-    },
-    //...add more sessions as needed
-  ];
-  */
   const [sessions, setSessions] = useState([]);
   useEffect(() => {
     fetch("/api/worksessions").then(response => response.json()).then(data => setSessions(data))
