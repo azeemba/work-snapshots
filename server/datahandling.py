@@ -47,11 +47,11 @@ class WorkSession:
                 max_count = count
                 max_title = title
         return max_title
-    
+
     @staticmethod
     def pickImageTimestamp(snapshots: Snapshots, mostActiveTitle: str) -> str:
         timesteps = list(snapshots.keys())
-        mid = len(timesteps)//2
+        mid = len(timesteps) // 2
         for i in range(mid, 0, -1):
             # start in the middle
             # and look for a timestep where mostActiveTitle is active
@@ -61,6 +61,7 @@ class WorkSession:
                     return p.timestamp_original
 
         return ""
+
 
 WorkSessionsDict = dict[int, WorkSession]
 
@@ -76,11 +77,11 @@ def prep(filepath, config=None) -> WorkSessionsDict:
     return sessions
 
 
-def makeSessionSummaryForFrontend(workSessions: WorkSessionsDict):
+def makeSummaryForFrontend(workSessions: WorkSessionsDict):
     lightSessions = []
     for identifier, w in workSessions.items():
         duration_minutes = w.duration.total_seconds() / 60
-        if (duration_minutes < 20):
+        if duration_minutes < 20:
             continue
         lightSessions.append(
             {
@@ -91,11 +92,31 @@ def makeSessionSummaryForFrontend(workSessions: WorkSessionsDict):
                 "duration_minutes": duration_minutes,
                 "title": w.preferred_title,
                 "image": f"/image/{w.preferred_image}.webp",
-                "details_api": f"/worksessions/{w.identifier}"
             }
         )
     lightSessions.sort(key=lambda x: x["start"], reverse=True)
     return lightSessions
+
+
+def makeDetailForFrontend(workSession: WorkSession):
+    detailed_snapshots = {}
+    for timestamp, processes in workSession.snapshots.items():
+        if not processes:
+            continue
+        current = []
+        timestamp = processes[0].timestamp
+        timestamp_original = processes[0].timestamp_original
+        for p in processes:
+            current.append(
+                {"process": p.process, "title": p.title, "active": p.isActive}
+            )
+
+        detailed_snapshots[timestamp.timestamp()] = {
+            "display_time": timestamp.strftime("%b %d, %Y %I:%M %p"),
+            "image": f"/image/{timestamp_original}.webp",
+            "processes": current,
+        }
+    return detailed_snapshots
 
 
 def readData(filepath, config=None) -> Snapshots:
