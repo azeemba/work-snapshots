@@ -62,7 +62,7 @@ class WorkSession:
 
         return ""
 
-WorkSessionsDict = dict[tuple[datetime, datetime], WorkSession]
+WorkSessionsDict = dict[int, WorkSession]
 
 
 def strToDatetime(name):
@@ -78,16 +78,20 @@ def prep(filepath, config=None) -> WorkSessionsDict:
 
 def makeSessionSummaryForFrontend(workSessions: WorkSessionsDict):
     lightSessions = []
-    for (start, end), w in workSessions.items():
+    for identifier, w in workSessions.items():
+        duration_minutes = w.duration.total_seconds() / 60
+        if (duration_minutes < 20):
+            continue
         lightSessions.append(
             {
                 "id": w.identifier,
                 "start": w.start.timestamp(),
                 "end": w.end.timestamp(),
-                "display_time": w.start.strftime("%b %d, %Y %I:%M %p"),
-                "duration_minutes": w.duration.total_seconds() / 60,
+                "display_time": f"{w.start.strftime('%b %d, %Y %I:%M %p')} - {w.end.strftime('%I:%M %p')}",
+                "duration_minutes": duration_minutes,
                 "title": w.preferred_title,
-                "image": f"/image/{w.preferred_image}.webp"
+                "image": f"/image/{w.preferred_image}.webp",
+                "details_api": f"/worksessions/{w.identifier}"
             }
         )
     lightSessions.sort(key=lambda x: x["start"], reverse=True)
@@ -153,7 +157,7 @@ def groupIntoSessions(groupedByTime: Snapshots, config=None) -> WorkSessionsDict
         if (timestamp - last_timestamp) > timeout_delta:
             if start_timestamp != datetime.min:
                 workSess = make_work_session()
-                sessions[(start_timestamp, last_timestamp)] = workSess
+                sessions[count] = workSess
             start_timestamp = timestamp
             last_timestamp = timestamp
             current_session: Snapshots = {}
@@ -162,7 +166,7 @@ def groupIntoSessions(groupedByTime: Snapshots, config=None) -> WorkSessionsDict
             current_session[timestamp] = groupedByTime[timestamp]
             last_timestamp = timestamp
 
-    sessions[(start_timestamp, last_timestamp)] = make_work_session()
+    sessions[count] = make_work_session()
     print(
         f"Took {(time.monotonic_ns() - start)/1e9} seconds to group all data ({len(sessions)} sessions)"
     )
