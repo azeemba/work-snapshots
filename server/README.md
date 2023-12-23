@@ -34,3 +34,9 @@ npm start
 
 There is a proxy configured for the react dev server
 to forward requests to this server.
+
+## Windows Setup
+
+Created a shortcut in "C:\Users\Z\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup"
+
+The shortcut runs run.bat
