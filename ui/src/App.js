@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Button, Tooltip } from 'flowbite-react';
 import 'tailwindcss/tailwind.css'
 
 import SessionCard from './sessionCard';
@@ -22,7 +23,9 @@ function App() {
           <h1 className="text-3xl font-bold ml-3">Work Sessions</h1>
         </div>
         <div>
-          <button className="px-4 py-2 rounded-md bg-indigo-500 text-indigo-50 hover:bg-indigo-600 transition-colors" onClick={refreshClick}>Refresh</button>
+        <Tooltip content="Reloads data from disk.">
+          <Button className="bg-indigo-500 text-indigo-50 hover:bg-indigo-600 transition-colors" onClick={refreshClick}>Refresh</Button>
+        </Tooltip>
         </div>
       </nav>
       <div className="container mx-auto px-2 md:px-0 py-5">

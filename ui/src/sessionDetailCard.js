@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useInView } from 'react-intersection-observer';
 
 export function SessionDetailCard({ session }) {
