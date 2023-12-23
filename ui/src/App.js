@@ -10,6 +10,10 @@ function App() {
     fetch("/api/worksessions").then(response => response.json()).then(data => setSessions(data))
   }, [])
 
+  function refreshClick() {
+    fetch("/api/refresh").then(() => { window.location.reload(false); })
+  }
+
   return (
     <div className="bg-gradient-to-r from-gray-800 to-gray-900 min-h-screen text-white">
       <nav className="bg-gradient-to-r from-gray-700 to-gray-800 px-4 py-2 flex justify-between items-center">
@@ -18,7 +22,7 @@ function App() {
           <h1 className="text-3xl font-bold ml-3">Work Sessions</h1>
         </div>
         <div>
-          <button className="px-4 py-2 rounded-md bg-indigo-500 text-indigo-50 hover:bg-indigo-600 transition-colors">Navigation Link</button>
+          <button className="px-4 py-2 rounded-md bg-indigo-500 text-indigo-50 hover:bg-indigo-600 transition-colors" onClick={refreshClick}>Refresh</button>
         </div>
       </nav>
       <div className="container mx-auto px-2 md:px-0 py-5">
