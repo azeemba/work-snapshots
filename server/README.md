@@ -40,3 +40,20 @@ to forward requests to this server.
 Created a shortcut in "C:\Users\Z\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup"
 
 The shortcut runs run.bat
+
+## Features Brainstorm
+
+- Rename session
+- Change session picture
+- Delete picture -> Changes actual data
+- Split session?
+- Delete session?
+- Group data by process instead of work sessions to get aggregate data?
+
+
+## Data
+
+Raw data is in a csv file that contains timestamp, process name, process title. We group them into work sessions by reading through
+the whole file at startup. It's fast enough so we can leave it there.
+
+We can create a new database to store customizations/overrides

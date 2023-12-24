@@ -1,27 +1,31 @@
 from pathlib import Path
-from bottle import static_file, route
-from configparser import ConfigParser
 import json
 
-from datahandling import makeSummaryForFrontend, prep, makeDetailForFrontend
+from bottle import static_file, route, request, abort
+from configparser import ConfigParser
+
+from datahandling import prep 
+from db_handler import Db
+from fronto import makeSummaryForFrontend, makeDetailForFrontend
 from images import prepare_thumbnails
 
 config = ConfigParser()
 config.read("config.conf")
+db = Db(config)
 root = config["main"]["static"]
 
 
 def loadData():
     sessions = prep(config["main"]["data"])
-    summary = makeSummaryForFrontend(sessions)
+    summary = makeSummaryForFrontend(sessions, db)
+    prepare_thumbnails(sessions, config)
     return sessions, summary
 
 
 WORK_SESSIONS, WORK_SESSIONS_SUMMARY = loadData()
-prepare_thumbnails(WORK_SESSIONS, config)
 
 
-@route("/api/worksessions/<identifier:int>")
+@route("/api/worksessions/<identifier:int>", method="GET")
 def work_session_specific(identifier):
     return makeDetailForFrontend(WORK_SESSIONS[identifier])
 
@@ -29,6 +33,13 @@ def work_session_specific(identifier):
 @route("/api/worksessions")
 def work_sessions():
     return json.dumps(WORK_SESSIONS_SUMMARY)
+
+
+@route("/api/worksessions/<identifier:int>", method="POST")
+def work_sessions_customize(identifier):
+    if request.json is None:
+        abort(400, "Request didn't contain valid JSON")
+    db.add_title(identifier, request.json["title"])
 
 
 @route("/")

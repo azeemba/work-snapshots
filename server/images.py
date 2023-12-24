@@ -14,8 +14,10 @@ def prepare_thumbnails(workSessions: WorkSessionsDict, config):
     image_path = config["main"]["images"]
     cache_path = config["main"]["cache"]
 
-    with Pool(6) as p:
-        p.map(partial(prepare_single_thumbnail, size, image_path, cache_path), workSessions.values())
+    # with Pool(6) as p:
+        # p.map(partial(prepare_single_thumbnail, size, image_path, cache_path), workSessions.values())
+    for session in workSessions.values():
+        prepare_single_thumbnail(size, image_path, cache_path, session)
 
     print(f"Took {(time.monotonic_ns() - start)/1e9} seconds to generate all thumbnails")
 
