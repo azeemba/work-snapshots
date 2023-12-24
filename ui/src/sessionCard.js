@@ -1,8 +1,14 @@
 import React from 'react';
+import { useInView } from 'react-intersection-observer';
 import 'tailwindcss/tailwind.css'
 import { Link } from "react-router-dom";
 
 function SessionCard({ session }) {
+
+  const {ref, inView } = useInView({
+    triggerOnce: true
+  });
+
   const startDate = session.display_time;
   let duration = `${session.duration_minutes} minutes`
   if (session.duration_minutes > 60) {
@@ -30,8 +36,11 @@ function SessionCard({ session }) {
 
   return (
     <Link to={link}>
-    <div className={backgroundColor + " cursor-pointer border-4 border-transparent shadow-lg rounded-md overflow-hidden transition-all duration-300 ease-in-out hover:border-indigo-500"}>
-      <img className="w-full" src={session.image} alt="Session Preview" />
+    <div className={backgroundColor + " cursor-pointer border-4 border-transparent shadow-lg rounded-md overflow-hidden transition-all duration-300 ease-in-out hover:border-indigo-500"} ref={ref}>
+      {inView ? 
+        <img className="w-full" src={session.image} alt="Session Preview" />
+        : null
+      }
       <div className="p-4">
         <h2 className="font-bold text-xl mb-1 text-white">{session.title}</h2>
         <p className="text-md text-gray-300 mb-1">{startDate}</p>

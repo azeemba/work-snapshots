@@ -18,9 +18,7 @@ export function SessionDetailCard({ session, timestamp, modalPreview, triggerMod
     ));
 
     function launchImage(p) {
-        console.log(session)
         let data = { key: timestamp, targetUrl: p.target.src }
-        console.log("Image clicked", data)
         triggerModalPreview(data)
     }
 

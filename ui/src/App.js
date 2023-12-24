@@ -4,7 +4,6 @@ import 'tailwindcss/tailwind.css'
 
 import SessionCard from './sessionCard';
 
-
 function App() {
   const [sessions, setSessions] = useState([]);
   useEffect(() => {
