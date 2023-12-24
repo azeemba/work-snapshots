@@ -35,6 +35,10 @@ def work_sessions():
 def serve_root():
     return static_file("/index.html", root=root)
 
+@route("/session/<session>")
+def serve_root_still(session):
+    return static_file("/index.html", root=root)
+
 
 @route("/image/<timestamp>")
 def serve_images(timestamp):
