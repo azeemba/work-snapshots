@@ -1,5 +1,9 @@
 from pathlib import Path
 import json
+import time
+import os
+import signal
+from threading import Thread
 
 from bottle import static_file, route, request, abort
 from configparser import ConfigParser
@@ -69,3 +73,13 @@ def refresh_data():
     global WORK_SESSIONS
     global WORK_SESSIONS_SUMMARY
     WORK_SESSIONS, WORK_SESSIONS_SUMMARY = loadData()
+
+@route("/exit")
+def exit():
+    Thread(target=shutdown_server).start()
+    return ''
+
+def shutdown_server():
+    time.sleep(1)
+    pid = os.getpid()  # Get process ID of the current Python script
+    os.kill(pid, signal.SIGINT)
