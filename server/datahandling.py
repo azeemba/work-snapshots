@@ -160,12 +160,12 @@ def groupIntoSessions(groupedByTime: Snapshots, config=None) -> WorkSessionsDict
     current_session: Snapshots = {}
     count = 0
 
-    def make_work_session():
+    def add_session():
         # We lambda capture a whole bunch of things but we need to
         # because we need to use it in the for loop AND outside the for loop
         title = WorkSession.pickTitle(current_session)
-        return WorkSession(
-            count,
+        w = WorkSession(
+            int(start_timestamp.timestamp()/100),
             start_timestamp,
             last_timestamp,
             last_timestamp - start_timestamp,
@@ -173,12 +173,12 @@ def groupIntoSessions(groupedByTime: Snapshots, config=None) -> WorkSessionsDict
             WorkSession.pickImageTimestamp(current_session, title),
             current_session,
         )
+        sessions[w.identifier] = w
 
     for timestamp in groupedByTime.keys():
         if (timestamp - last_timestamp) > timeout_delta:
             if start_timestamp != datetime.min:
-                workSess = make_work_session()
-                sessions[count] = workSess
+                add_session()
             start_timestamp = timestamp
             last_timestamp = timestamp
             current_session: Snapshots = {}
@@ -187,7 +187,7 @@ def groupIntoSessions(groupedByTime: Snapshots, config=None) -> WorkSessionsDict
             current_session[timestamp] = groupedByTime[timestamp]
             last_timestamp = timestamp
 
-    sessions[count] = make_work_session()
+    add_session()
     print(
         f"Took {(time.monotonic_ns() - start)/1e9} seconds to group all data ({len(sessions)} sessions)"
     )
