@@ -5,7 +5,9 @@ import os
 import signal
 from threading import Thread
 
-from bottle import static_file, route, request, abort
+from typing import cast
+
+from bottle import static_file, route, request, abort, error
 from configparser import ConfigParser
 
 from datahandling import prep 
@@ -43,7 +45,8 @@ def work_sessions():
 def work_sessions_customize(identifier):
     if request.json is None:
         abort(400, "Request didn't contain valid JSON")
-    db.add_title(identifier, request.json["title"])
+    request_data: dict = cast(dict, request.json)
+    db.add_title(identifier, request_data["title"])
 
 
 @route("/")
@@ -54,6 +57,11 @@ def serve_root():
 def serve_root_still(session):
     return static_file("/index.html", root=root)
 
+@error(404)
+def error404(err):
+    if request.path.endswith(".webp"):
+        print(f"Failed to find {request.path}")
+        return static_file("StupidMissingImage.webp", root=config["main"]["cache"])
 
 @route("/image/<timestamp>")
 def serve_images(timestamp):
