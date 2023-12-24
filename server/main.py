@@ -4,6 +4,7 @@ from configparser import ConfigParser
 import json
 
 from datahandling import makeSummaryForFrontend, prep, makeDetailForFrontend
+from images import prepare_thumbnails
 
 config = ConfigParser()
 config.read("config.conf")
@@ -17,8 +18,7 @@ def loadData():
 
 
 WORK_SESSIONS, WORK_SESSIONS_SUMMARY = loadData()
-
-loadData()
+prepare_thumbnails(WORK_SESSIONS, config)
 
 
 @route("/api/worksessions/<identifier:int>")
@@ -44,6 +44,9 @@ def serve_root_still(session):
 def serve_images(timestamp):
     return static_file(timestamp, root=config["main"]["images"])
 
+@route("/cache/<file>")
+def serve_cached(file):
+    return static_file(file, config["main"]["cache"])
 
 @route("/<path:path>")
 def serve_static(path):

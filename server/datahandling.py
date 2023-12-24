@@ -52,13 +52,14 @@ class WorkSession:
     def pickImageTimestamp(snapshots: Snapshots, mostActiveTitle: str) -> str:
         timesteps = list(snapshots.keys())
         mid = len(timesteps) // 2
-        for i in range(mid, 0, -1):
+        for i in range(0, mid-1):
             # start in the middle
             # and look for a timestep where mostActiveTitle is active
-            processes = snapshots[timesteps[i]]
-            for p in processes:
-                if p.title == mostActiveTitle and p.isActive:
-                    return p.timestamp_original
+            for direction in [-1, 1]:
+                processes = snapshots[timesteps[mid + direction*i]]
+                for p in processes:
+                    if p.title == mostActiveTitle and p.isActive:
+                        return p.timestamp_original
 
         return ""
 
@@ -91,7 +92,7 @@ def makeSummaryForFrontend(workSessions: WorkSessionsDict):
                 "display_time": f"{w.start.strftime('%b %d, %Y %I:%M %p')} - {w.end.strftime('%I:%M %p')}",
                 "duration_minutes": duration_minutes,
                 "title": w.preferred_title,
-                "image": f"/image/{w.preferred_image}.webp",
+                "image": f"/cache/{w.preferred_image}.webp",
             }
         )
     lightSessions.sort(key=lambda x: x["start"], reverse=True)
@@ -149,7 +150,7 @@ def groupIntoSessions(groupedByTime: Snapshots, config=None) -> WorkSessionsDict
     start = time.monotonic_ns()
     timeout_minutes = 60
     if config is not None:
-        timeout_minutes = config["filter"]["session_timeout_minutes"]
+        timeout_minutes = config.getint("filter","session_timeout_minutes")
 
     timeout_delta = timedelta(minutes=timeout_minutes)
 
