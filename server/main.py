@@ -10,7 +10,7 @@ from typing import cast
 from bottle import static_file, route, request, abort, error
 from configparser import ConfigParser
 
-from datahandling import prep 
+from datahandling import prep
 from db_handler import Db
 from fronto import makeSummaryForFrontend, makeDetailForFrontend
 from images import prepare_thumbnails
@@ -53,9 +53,11 @@ def work_sessions_customize(identifier):
 def serve_root():
     return static_file("/index.html", root=root)
 
+
 @route("/session/<session>")
 def serve_root_still(session):
     return static_file("/index.html", root=root)
+
 
 @error(404)
 def error404(err):
@@ -63,13 +65,16 @@ def error404(err):
         print(f"Failed to find {request.path}")
         return static_file("StupidMissingImage.webp", root=config["main"]["cache"])
 
+
 @route("/image/<timestamp>")
 def serve_images(timestamp):
     return static_file(timestamp, root=config["main"]["images"])
 
+
 @route("/cache/<file>")
 def serve_cached(file):
     return static_file(file, config["main"]["cache"])
+
 
 @route("/<path:path>")
 def serve_static(path):
@@ -82,10 +87,12 @@ def refresh_data():
     global WORK_SESSIONS_SUMMARY
     WORK_SESSIONS, WORK_SESSIONS_SUMMARY = loadData()
 
+
 @route("/exit")
 def exit():
     Thread(target=shutdown_server).start()
-    return ''
+    return ""
+
 
 def shutdown_server():
     time.sleep(1)

@@ -3,6 +3,7 @@
 from datahandling import WorkSessionsDict, WorkSession
 from db_handler import Db
 
+
 def makeSummaryForFrontend(workSessions: WorkSessionsDict, db: Db):
     lightSessions = []
     overrides = db.get_all_overrides()
@@ -50,4 +51,3 @@ def makeDetailForFrontend(workSession: WorkSession):
             "processes": current,
         }
     return detailed_snapshots
-

@@ -6,9 +6,9 @@ from configparser import ConfigParser
 
 schema = {
     1: "CREATE TABLE IF NOT EXISTS session_overrides("
-        " identifier INTEGER PRIMARY KEY,"
-        " title TEXT,"
-        " tags TEXT)",
+    " identifier INTEGER PRIMARY KEY,"
+    " title TEXT,"
+    " tags TEXT)",
 }
 
 

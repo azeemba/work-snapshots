@@ -56,7 +56,7 @@ class WorkSession:
             # start in the middle
             # and look for a timestep where mostActiveTitle is active
             for direction in [-1, 1]:
-                processes = snapshots[timesteps[mid + direction*i]]
+                processes = snapshots[timesteps[mid + direction * i]]
                 for p in processes:
                     if p.title == mostActiveTitle and p.isActive:
                         return p.timestamp_original
@@ -76,7 +76,6 @@ def prep(filepath, config=None) -> WorkSessionsDict:
     groupedByTime = readData(filepath, config)
     sessions = groupIntoSessions(groupedByTime, config)
     return sessions
-
 
 
 def readData(filepath, config=None) -> Snapshots:
@@ -109,7 +108,7 @@ def groupIntoSessions(groupedByTime: Snapshots, config=None) -> WorkSessionsDict
     start = time.monotonic_ns()
     timeout_minutes = 60
     if config is not None:
-        timeout_minutes = config.getint("filter","session_timeout_minutes")
+        timeout_minutes = config.getint("filter", "session_timeout_minutes")
 
     timeout_delta = timedelta(minutes=timeout_minutes)
 
@@ -125,7 +124,7 @@ def groupIntoSessions(groupedByTime: Snapshots, config=None) -> WorkSessionsDict
         # because we need to use it in the for loop AND outside the for loop
         title = WorkSession.pickTitle(current_session)
         w = WorkSession(
-            int(start_timestamp.timestamp()/100),
+            int(start_timestamp.timestamp() / 100),
             start_timestamp,
             last_timestamp,
             last_timestamp - start_timestamp,
