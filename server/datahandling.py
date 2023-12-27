@@ -127,7 +127,7 @@ def groupIntoSessions(groupedByTime: Snapshots, config=None) -> WorkSessionsDict
             int(start_timestamp.timestamp() / 100),
             start_timestamp,
             last_timestamp,
-            last_timestamp - start_timestamp,
+            timedelta(minutes=len(current_session)*5), # 5 minutes for each snapshot
             title,
             WorkSession.pickImageTimestamp(current_session, title),
             current_session,
