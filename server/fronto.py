@@ -1,12 +1,11 @@
 """Massage raw data to be frontend-friendly and enrich with custom data"""
 
 from datahandling import WorkSessionsDict, WorkSession
-from db_handler import Db
+from db_handler import SessionOverride
 
 
-def makeSummaryForFrontend(workSessions: WorkSessionsDict, db: Db):
+def makeSummaryForFrontend(workSessions: WorkSessionsDict, overrides: dict[int, SessionOverride]):
     lightSessions = []
-    overrides = db.get_all_overrides()
 
     for identifier, w in workSessions.items():
         duration_minutes = w.duration.total_seconds() / 60
@@ -14,8 +13,10 @@ def makeSummaryForFrontend(workSessions: WorkSessionsDict, db: Db):
             continue
 
         title = w.preferred_title
-        if identifier in overrides and overrides[identifier].custom_title:
+        tag = ""
+        if identifier in overrides:
             title = overrides[identifier].custom_title
+            tag = overrides[identifier].tag
 
         lightSessions.append(
             {
@@ -25,6 +26,7 @@ def makeSummaryForFrontend(workSessions: WorkSessionsDict, db: Db):
                 "display_time": f"{w.start.strftime('%b %d, %Y %I:%M %p')} - {w.end.strftime('%I:%M %p')}",
                 "duration_minutes": duration_minutes,
                 "title": title,
+                "tag": tag,
                 "image": f"/cache/{w.preferred_image}.webp",
             }
         )

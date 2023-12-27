@@ -9,6 +9,9 @@ schema = {
     " identifier INTEGER PRIMARY KEY,"
     " title TEXT,"
     " tags TEXT)",
+    2: "ALTER TABLE session_overrides RENAME tags TO tag",
+    3: "CREATE TABLE IF NOT EXISTS tags("
+    "tag TEXT, color TEXT, icon TEXT)"
 }
 
 

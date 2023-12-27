@@ -8,7 +8,7 @@ import sqlite3
 class SessionOverride:
     identifier: int
     custom_title: str | None
-    tags: list[str] | None
+    tag: str | None
 
 
 class Db:
@@ -21,27 +21,33 @@ class Db:
 
     def get_all_overrides(self):
         res = self.connection.execute(
-            "SELECT identifier, title, tags FROM session_overrides"
+            "SELECT identifier, title, tag FROM session_overrides"
         )
 
         overrides: dict[int, SessionOverride] = {}
         for row in res:
-            tags: str = row[2] if row[2] else ""
-            overrides[row[0]] = SessionOverride(row[0], row[1], tags.split(" "))
+            tag: str = row[2] if row[2] else ""
+            overrides[row[0]] = SessionOverride(row[0], row[1], tag)
 
         print(overrides)
         return overrides
 
-    def add_title(self, identifer, title):
+    def add_override(self, identifer, title, tag):
         res = self.connection.execute(
-            'INSERT INTO session_overrides (identifier, title, tags) VALUES (?, ?, "")',
-            (identifer, title),
+            """INSERT INTO session_overrides (identifier, title, tag)
+                VALUES (?, ?, ?)
+                ON CONFLICT (identifier)
+                DO UPDATE SET
+                    title=excluded.title,
+                    tag=excluded.tag
+            """,
+            (identifer, title, tag),
         )
-        print(f"Updated {res.rowcount} in add_title")
+        print(f"Updated {res.rowcount} in add_override")
 
     def get_specific_override(self, identifier):
         res = self.connection.execute(
-            "SELECT identifier, title, tags FROM session_overrides WHERE identifier = ?",
+            "SELECT identifier, title, tag FROM session_overrides WHERE identifier = ?",
             (identifier,),
         )
 
@@ -49,4 +55,16 @@ class Db:
             return None
 
         row = res.fetchone()
-        return SessionOverride(row[0], row[1], row[2].split())
+        return SessionOverride(row[0], row[1], row[2])
+    
+    def get_all_tags(self):
+        res = self.connection.execute("SELECT tag, color, icon FROM tags");
+        tagList = [{"tag": row[0], "color": row[1], "icon": row[2]} for row in res.fetchall()]
+        return {
+            "tags":  tagList
+        }
+    
+    def create_tag(self, tag):
+        res = self.connection.execute(
+            "INSERT INTO tags (tag, color, icon) VALUES (?, ?, ?)",
+            (tag, None, None))

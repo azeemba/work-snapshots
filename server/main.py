@@ -23,12 +23,27 @@ root = config["main"]["static"]
 
 def loadData():
     sessions = prep(config["main"]["data"])
-    summary = makeSummaryForFrontend(sessions, db)
+    summary = makeSummaryForFrontend(sessions, db.get_all_overrides())
     prepare_thumbnails(sessions, config)
     return sessions, summary
 
 
 WORK_SESSIONS, WORK_SESSIONS_SUMMARY = loadData()
+
+@route("/api/tags", method="GET")
+def get_tags():
+    tags = db.get_all_tags()
+    print(tags)
+    return tags
+
+@route("/api/tags/", method="PUT")
+def addTag():
+    if request.json is None:
+        abort(400, "Request didn't contain valid JSON")
+    request_data: dict = cast(dict, request.json)
+    db.create_tag(request_data["tag"])
+    return db.get_all_tags()
+
 
 
 @route("/api/worksessions/<identifier:int>", method="GET")
@@ -46,7 +61,11 @@ def work_sessions_customize(identifier):
     if request.json is None:
         abort(400, "Request didn't contain valid JSON")
     request_data: dict = cast(dict, request.json)
-    db.add_title(identifier, request_data["title"])
+    db.add_override(identifier, request_data["title"], request_data["tag"])
+
+    global WORK_SESSIONS_SUMMARY
+    WORK_SESSIONS_SUMMARY = makeSummaryForFrontend(WORK_SESSIONS, db.get_all_overrides())
+    return json.dumps(WORK_SESSIONS_SUMMARY)
 
 
 @route("/")
