@@ -1,3 +1,4 @@
+from datetime import datetime
 from pathlib import Path
 import json
 import time
@@ -12,7 +13,7 @@ from configparser import ConfigParser
 
 from datahandling import prep
 from db_handler import Db
-from fronto import makeSummaryForFrontend, makeDetailForFrontend
+from fronto import makeSummaryForFrontend, makeDetailForFrontend, addWorkSessionSplits
 from images import prepare_thumbnails
 
 config = ConfigParser()
@@ -23,6 +24,7 @@ root = config["main"]["static"]
 
 def loadData():
     sessions = prep(config["main"]["data"])
+    addWorkSessionSplits(sessions, db.get_all_splits())
     summary = makeSummaryForFrontend(sessions, db.get_all_overrides())
     prepare_thumbnails(sessions, config)
     return sessions, summary
@@ -44,6 +46,23 @@ def addTag():
     db.create_tag(request_data["tag"])
     return db.get_all_tags()
 
+
+@route("/api/worksessions/<identifier:int>/split", method="POST")
+def addSplit(identifier):
+    if request.json is None:
+        abort(400, "Request didn't contain valid JSON")
+
+    request_data: dict = cast(dict, request.json)
+    print(request.json)
+    timestamp = request_data["customStartTimestamp"]
+    customStart = datetime.fromtimestamp(float(timestamp))
+    db.add_splits(identifier, customStart)
+
+    addWorkSessionSplits(WORK_SESSIONS, [(identifier, customStart)])
+    global WORK_SESSIONS_SUMMARY
+    WORK_SESSIONS_SUMMARY = makeSummaryForFrontend(WORK_SESSIONS, db.get_all_overrides())
+    prepare_thumbnails(WORK_SESSIONS, config)
+    return json.dumps(WORK_SESSIONS_SUMMARY)
 
 
 @route("/api/worksessions/<identifier:int>", method="GET")

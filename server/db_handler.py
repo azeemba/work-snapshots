@@ -1,5 +1,6 @@
 from configparser import ConfigParser
 from dataclasses import dataclass
+from datetime import datetime
 from typing import cast
 import sqlite3
 
@@ -68,3 +69,16 @@ class Db:
         res = self.connection.execute(
             "INSERT INTO tags (tag, color, icon) VALUES (?, ?, ?)",
             (tag, None, None))
+
+
+    def get_all_splits(self):
+        res = self.connection.execute(
+            "SELECT originalKey, customStartDatetime FROM splits")
+        return [(int(row[0]), datetime.fromisoformat(row[1])) for row in res.fetchall()]
+    
+    def add_splits(self, sessionKey: int, customStart: datetime):
+        res = self.connection.execute(
+            """INSERT INTO splits (originalKey, customStartDatetime)
+            VALUES (?, ?)""", (sessionKey, customStart.isoformat())
+        )
+        print(f"Updated {res.rowcount} in add_splits")
