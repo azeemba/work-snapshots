@@ -14,6 +14,19 @@ function SessionCard({ session, availableTags, onEdit }) {
     triggerOnce: true,
   });
 
+  const tagColors = {};
+  const availableColors = [
+    "info",
+    "warning",
+    "indigo",
+    "purple",
+    "success",
+    "pink",
+  ];
+  availableTags.forEach((element, i) => {
+    tagColors[element.tag] = availableColors[i % availableColors.length];
+  });
+
   // Get available tags?
   const tagDropdown = (
     <div className="flex flex-row h-8">
@@ -99,16 +112,20 @@ function SessionCard({ session, availableTags, onEdit }) {
             </h2>
           )}
           <p className="text-md text-gray-300 mb-1">{startDate}</p>
-          <p className="text-sm text-gray-400">Duration: {duration}</p>
+          <p className="text-sm text-gray-400">Active: {duration}</p>
           <div className="flex flex-row justify-between py-2">
             {inEditMode ? (
               tagDropdown
             ) : (
               <div className="h-8">
                 {session.tag ? (
-                  <Badge>{session.tag}</Badge>
+                  <Badge color={tagColors[session.tag] || "failure"} size="sm">
+                    {session.tag}
+                  </Badge>
                 ) : (
-                  <Badge color="gray">Untagged</Badge>
+                  <Badge color="gray" size="sm">
+                    Untagged
+                  </Badge>
                 )}
               </div>
             )}
