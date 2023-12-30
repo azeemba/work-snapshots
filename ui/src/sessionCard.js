@@ -4,14 +4,14 @@ import "tailwindcss/tailwind.css";
 import { FaCheck, FaPencilAlt, FaPlus } from "react-icons/fa";
 import { FaXmark } from "react-icons/fa6";
 import { Link } from "react-router-dom";
-import { Button, Badge, TextInput } from "flowbite-react";
+import { Button, Badge, TextInput, Tooltip } from "flowbite-react";
 
 function SessionCard({ session, availableTags, onEdit }) {
   const [inEditMode, setEditMode] = useState(false);
   const [editedTitle, setEditedTitle] = useState(session.title);
   const [editedTag, setEditedTag] = useState(session.tag);
   const { ref, inView } = useInView({
-    triggerOnce: true,
+    triggerOnce: true
   });
 
   const tagColors = {};
@@ -89,6 +89,7 @@ function SessionCard({ session, availableTags, onEdit }) {
 
   return (
     <Link to={link}>
+      <Tooltip content={session.title}>
       <div
         className={
           backgroundColor +
@@ -96,10 +97,13 @@ function SessionCard({ session, availableTags, onEdit }) {
         }
         ref={ref}
       >
+        <div className="w-full aspect-video">
         {inView ? (
           <img className="w-full" src={session.image} alt="Session Preview" />
         ) : null}
+        </div>
         <div className="p-4">
+          <div className="h-14 overflow-hidden">
           {inEditMode ? (
             <TextInput
               onClick={(e) => e.preventDefault()}
@@ -110,7 +114,7 @@ function SessionCard({ session, availableTags, onEdit }) {
             <h2 className="font-bold text-xl mb-1 text-white">
               {session.title}
             </h2>
-          )}
+          )}</div>
           <p className="text-md text-gray-300 mb-1">{startDate}</p>
           <p className="text-sm text-gray-400">Active: {duration}</p>
           <div className="flex flex-row justify-between py-2">
@@ -150,6 +154,7 @@ function SessionCard({ session, availableTags, onEdit }) {
           </div>
         </div>
       </div>
+</Tooltip>
     </Link>
   );
 }
