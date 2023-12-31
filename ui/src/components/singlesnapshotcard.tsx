@@ -95,19 +95,22 @@ export default function SingleSnapshotCard({
                       alt="A zoomable version"
                     />
                   </TransformComponent>
-                  <div className="flex flex-row-reverse gap-2 py-2">
-                    <Button onClick={() => triggerModalPreview({})}>
-                      <MdClose />
-                      Close
-                    </Button>
-                    <Button onClick={() => resetTransform()}>Reset</Button>
-                    <Button
+                  <div className="flex flex-row justify-between py-2">
+                   <Button
                       className="bg-pink-950"
                       onClick={handleSplitClicked}
                     >
                       <TfiUnlink />
                       <div>Split</div>
                     </Button>
+                  <div className="flex flex-row-reverse gap-2">
+                    <Button onClick={() => triggerModalPreview({})}>
+                      <MdClose />
+                      Close
+                    </Button>
+                    <Button onClick={() => resetTransform()}>Reset</Button>
+                  </div>
+ 
                   </div>
                 </Fragment>
               )}
@@ -123,7 +126,7 @@ export default function SingleSnapshotCard({
           onClick={launchImage}
         >
           <div className="w-full aspect-video">
-            {inView ? <img src={session.image} alt="Session Detail" /> : null}
+            {inView ? <img src={session.image + "?thumbnail=1"} alt="Session Detail" /> : null}
           </div>
           <div className="flex flex-row justify-between items-center">
             <p className="text-md text-gray-300">{session.display_time}</p>
