@@ -1,72 +1,59 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useLoaderData, useParams } from "react-router-dom";
-import SingleSnapshotCard from "../components/singlesnapshotcard"
+import SingleSnapshotCard from "../components/singlesnapshotcard";
 import ProcessesTable from "../components/processestable";
 import { Carousel, Progress, Button } from "flowbite-react";
 
-export async function loader({ params }: {params: {sessionId: string}}) {
-    const sessionId = params.sessionId;
-    const details = await fetch(`/api/worksessions/${sessionId}`);
-    return details;
+export async function loader({ params }: { params: { sessionId: string } }) {
+  const sessionId = params.sessionId;
+  const resp = await fetch(`/api/worksessions/${sessionId}`);
+  const data = await resp.json();
+  return data;
 }
-
 
 function WorkSession() {
   const [modalPreviewDetails, requestdModalPreview] = useState({});
-  const [activeSessionIndex, changeActiveSessionIndex] = useState(0);
-  const details = useLoaderData();
+  const { session, details } = useLoaderData();
   const timestamps = Object.keys(details);
-  const {sessionId} = useParams()
+  const { sessionId } = useParams();
 
-  function handleTriggerModalPreview({ key, targetUrl }) {
+  function handleTriggerModalPreview({ snapshotId, targetUrl }) {
     requestdModalPreview({
-      timestamp: key,
+      snapshotId,
       targetUrl: targetUrl,
     });
   }
-  async function handleSplitClick() {
-    const res = await fetch(`/api/worksessions/${sessionId}/split`, {
+  async function handleSplitClick(snapshotId: number) {
+    await fetch(`/api/worksessions/${sessionId}/split`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        customStartTimestamp: timestamps[activeSessionIndex]
-      })
+        customStartTimestamp: snapshotId,
+      }),
     });
-    console.log("Split added. Will refresh instead of being clever.")
-    window.location.reload(false);
+    console.log("Split added. Will refresh instead of being clever.");
+    window.location.reload();
   }
   const cards = timestamps.map((ts) => (
     <SingleSnapshotCard
       key={ts}
       session={details[ts]}
-      timestamp={ts}
+      snapshotId={ts}
       modalPreview={
-        modalPreviewDetails.timestamp === ts ? modalPreviewDetails : null
+        modalPreviewDetails.snapshotId === ts ? modalPreviewDetails : null
       }
       triggerModalPreview={handleTriggerModalPreview}
+      splitSessionAtSnapshot={handleSplitClick}
     />
   ));
   return (
     <div className="bg-gray-900 min-h-screen text-white flex justify-center flex-col">
-      <Carousel
-        indicators={false}
-        pauseOnHover
-        slide={!modalPreviewDetails.timestamp}
-        onSlideChange={changeActiveSessionIndex}
-      >
+      <h1 className="text-2xl ml-3">{session.title}</h1>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         {cards}
-      </Carousel>
-      <Progress
-        progress={(activeSessionIndex / timestamps.length) * 100}
-        size="sm"
-        color="green"
-      ></Progress>
-      <Button color="failure" className="w-1/3 m-2" onClick={handleSplitClick}>Split!</Button>
-      <ProcessesTable
-        session={details[timestamps[activeSessionIndex]]}
-      ></ProcessesTable>
+      </div>
     </div>
   );
 }

@@ -14,8 +14,7 @@ export default function ProcessesTable({ session }) {
 
   return (
     <div className="p-4 w-full max-w-screen-lg">
-      <h2>{session.display_time}</h2>
-      <Table hoverable>
+      <Table hoverable className="bg-slate-900">
         <Table.Head>
           <Table.HeadCell>Process</Table.HeadCell>
           <Table.HeadCell>Title</Table.HeadCell>

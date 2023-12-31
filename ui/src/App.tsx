@@ -1,4 +1,4 @@
-import './App.css'
+import "./App.css";
 import { Button, Tooltip } from "flowbite-react";
 import { Outlet, useLocation, Link } from "react-router-dom";
 import "tailwindcss/tailwind.css";
@@ -42,5 +42,3 @@ function App() {
 }
 
 export default App;
-
-

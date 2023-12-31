@@ -2,13 +2,13 @@ import { useEffect, useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import { Button, TextInput } from "flowbite-react";
 
-export async function loader({ params }: {params: {sessionId: string}}) {
-    const sessionId = params.sessionId;
-    const details = await fetch(`/api/worksessions/${sessionId}`);
-    return details;
+export async function loader({ params }: { params: { sessionId: string } }) {
+  const sessionId = params.sessionId;
+  const details = await fetch(`/api/worksessions/${sessionId}`);
+  return details;
 }
 
-import SessionSummaryCard from "../components/sessionsummarycard"
+import SessionSummaryCard from "../components/sessionsummarycard";
 
 export default function WorkSessionsSummaries() {
   const [sessions, setSessions] = useState([]);
