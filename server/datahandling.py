@@ -19,6 +19,7 @@ class Process:
 
 Snapshots = dict[datetime, list[Process]]
 
+
 def clean_title(title: str):
     return title.replace("●", "").replace("*", "")
 
@@ -61,7 +62,7 @@ class WorkSession:
             for direction in [-1, 1]:
                 processes = snapshots[timesteps[mid + direction * i]]
                 for p in processes:
-                    if p.isActive and clean_title(p.title) == mostActiveTitle: 
+                    if p.isActive and clean_title(p.title) == mostActiveTitle:
                         return p.timestamp_original
 
         return ""
@@ -106,6 +107,7 @@ def readData(filepath, config=None) -> Snapshots:
     print(f"Took {(time.monotonic_ns() - start)/1e9} seconds to read all data")
     return byTime
 
+
 def datetime2key(input: datetime):
     return int(input.timestamp() / 100)
 
@@ -133,7 +135,7 @@ def groupIntoSessions(groupedByTime: Snapshots, config=None) -> WorkSessionsDict
             datetime2key(start_timestamp),
             start_timestamp,
             last_timestamp,
-            timedelta(minutes=len(current_session)*5), # 5 minutes for each snapshot
+            timedelta(minutes=len(current_session) * 5),  # 5 minutes for each snapshot
             title,
             WorkSession.pickImageTimestamp(current_session, title),
             current_session,

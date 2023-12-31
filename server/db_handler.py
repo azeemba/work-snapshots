@@ -57,28 +57,29 @@ class Db:
 
         row = res.fetchone()
         return SessionOverride(row[0], row[1], row[2])
-    
+
     def get_all_tags(self):
-        res = self.connection.execute("SELECT tag, color, icon FROM tags");
-        tagList = [{"tag": row[0], "color": row[1], "icon": row[2]} for row in res.fetchall()]
-        return {
-            "tags":  tagList
-        }
-    
+        res = self.connection.execute("SELECT tag, color, icon FROM tags")
+        tagList = [
+            {"tag": row[0], "color": row[1], "icon": row[2]} for row in res.fetchall()
+        ]
+        return {"tags": tagList}
+
     def create_tag(self, tag):
         res = self.connection.execute(
-            "INSERT INTO tags (tag, color, icon) VALUES (?, ?, ?)",
-            (tag, None, None))
-
+            "INSERT INTO tags (tag, color, icon) VALUES (?, ?, ?)", (tag, None, None)
+        )
 
     def get_all_splits(self):
         res = self.connection.execute(
-            "SELECT originalKey, customStartDatetime FROM splits")
+            "SELECT originalKey, customStartDatetime FROM splits"
+        )
         return [(int(row[0]), datetime.fromisoformat(row[1])) for row in res.fetchall()]
-    
+
     def add_splits(self, sessionKey: int, customStart: datetime):
         res = self.connection.execute(
             """INSERT INTO splits (originalKey, customStartDatetime)
-            VALUES (?, ?)""", (sessionKey, customStart.isoformat())
+            VALUES (?, ?)""",
+            (sessionKey, customStart.isoformat()),
         )
         print(f"Updated {res.rowcount} in add_splits")

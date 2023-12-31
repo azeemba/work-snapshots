@@ -8,34 +8,44 @@ from functools import partial
 from datahandling import WorkSessionsDict, WorkSession
 
 
-def prepare_thumbnails(workSessions: WorkSessionsDict, config):
-    start = time.monotonic_ns()
-    size = config.getint("ui", "thumbnail_size")
-    image_path = config["main"]["images"]
-    cache_path = config["main"]["cache"]
+class ImageHandler:
+    def __init__(self, config):
+        self.image_path = config["main"]["images"]
+        self.cache_path = config["main"]["cache"]
+        self.thumbnail_size = config.getint("ui", "thumbnail_size")
+        self.cached_images = set(
+            str(s.name) for s in Path(self.cache_path).glob("*.webp")
+        )
 
-    # with Pool(6) as p:
-    # p.map(partial(prepare_single_thumbnail, size, image_path, cache_path), workSessions.values())
-    for session in workSessions.values():
-        prepare_single_thumbnail(size, image_path, cache_path, session)
+    def prepare_thumbnails(self, workSessions: WorkSessionsDict):
+        start = time.monotonic_ns()
 
-    print(
-        f"Took {(time.monotonic_ns() - start)/1e9} seconds to generate all thumbnails"
-    )
+        # with Pool(6) as p:
+        # p.map(partial(prepare_single_thumbnail, size, image_path, cache_path), workSessions.values())
+        for session in workSessions.values():
+            preferred = session.preferred_image + ".webp"
+            self._prepare_single_thumbnail(self.thumbnail_size, preferred)
 
+        print(
+            f"Took {(time.monotonic_ns() - start)/1e9} seconds to generate all thumbnails"
+        )
 
-def prepare_single_thumbnail(size, image_path, cache_path, session: WorkSession):
-    preferred = session.preferred_image + ".webp"
-    original_path = Path(image_path, preferred)
-    if not original_path.exists():
-        print(f"Bailing on {original_path}. Doesn't exit")
-        return
+    def makeSureThumbnailExists(self, image):
+        self._prepare_single_thumbnail(self.thumbnail_size, image)
 
-    target_path = Path(cache_path, preferred)
-    if target_path.exists():
-        print(f"Skipping generating thumbnail for {session.identifier}")
-        return
+    def _prepare_single_thumbnail(self, size, imageName):
+        if imageName in self.cached_images:
+            print(f"Thumbnail already exists: {imageName}.")
+            return
 
-    with Image.open(original_path) as original:
-        original.thumbnail((size, size))
-        original.save(target_path)
+        original_path = Path(self.image_path, imageName)
+        if not original_path.exists():
+            print(f"Origina file doesn't exist: {original_path}.")
+            return
+
+        target_path = Path(self.cache_path, imageName)
+
+        with Image.open(original_path) as original:
+            original.thumbnail((size, size))
+            original.save(target_path)
+        self.cached_images.add(imageName)

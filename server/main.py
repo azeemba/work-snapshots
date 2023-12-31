@@ -14,11 +14,12 @@ from configparser import ConfigParser
 from datahandling import prep
 from db_handler import Db
 from fronto import makeSummaryForFrontend, makeDetailForFrontend, addWorkSessionSplits
-from images import prepare_thumbnails
+from images import ImageHandler
 
 config = ConfigParser()
 config.read("config.conf")
 db = Db(config)
+imageHandler = ImageHandler(config)
 frontend_dir = config["main"]["static"]
 
 
@@ -26,17 +27,19 @@ def loadData():
     sessions = prep(config["main"]["data"])
     addWorkSessionSplits(sessions, db.get_all_splits())
     summary = makeSummaryForFrontend(sessions, db.get_all_overrides())
-    prepare_thumbnails(sessions, config)
+    imageHandler.prepare_thumbnails(sessions)
     return sessions, summary
 
 
 WORK_SESSIONS, WORK_SESSIONS_SUMMARY = loadData()
+
 
 @route("/api/tags", method="GET")
 def get_tags():
     tags = db.get_all_tags()
     print(tags)
     return tags
+
 
 @route("/api/tags/", method="PUT")
 def addTag():
@@ -60,8 +63,10 @@ def addSplit(identifier):
 
     addWorkSessionSplits(WORK_SESSIONS, [(identifier, customStart)])
     global WORK_SESSIONS_SUMMARY
-    WORK_SESSIONS_SUMMARY = makeSummaryForFrontend(WORK_SESSIONS, db.get_all_overrides())
-    prepare_thumbnails(WORK_SESSIONS, config)
+    WORK_SESSIONS_SUMMARY = makeSummaryForFrontend(
+        WORK_SESSIONS, db.get_all_overrides()
+    )
+    imageHandler.prepare_thumbnails(WORK_SESSIONS)
     return json.dumps(WORK_SESSIONS_SUMMARY)
 
 
@@ -87,7 +92,9 @@ def work_sessions_customize(identifier):
     db.add_override(identifier, request_data["title"], request_data["tag"])
 
     global WORK_SESSIONS_SUMMARY
-    WORK_SESSIONS_SUMMARY = makeSummaryForFrontend(WORK_SESSIONS, db.get_all_overrides())
+    WORK_SESSIONS_SUMMARY = makeSummaryForFrontend(
+        WORK_SESSIONS, db.get_all_overrides()
+    )
     return json.dumps(WORK_SESSIONS_SUMMARY)
 
 
@@ -110,6 +117,9 @@ def error404(err):
 
 @route("/image/<timestamp>")
 def serve_images(timestamp):
+    if request.query.thumbnail:
+        imageHandler.makeSureThumbnailExists(timestamp)
+        return static_file(timestamp, root=config["main"]["cache"])
     return static_file(timestamp, root=config["main"]["images"])
 
 
