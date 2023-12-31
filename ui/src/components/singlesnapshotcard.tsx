@@ -18,7 +18,7 @@ import {
     });
   
     function launchImage(p) {
-      let data = { key: timestamp, targetUrl: p.target.src };
+      const data = { key: timestamp, targetUrl: p.target.src };
       triggerModalPreview(data);
     }
   

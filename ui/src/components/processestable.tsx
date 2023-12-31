@@ -1,8 +1,8 @@
 import { Table } from "flowbite-react";
 
 export default function ProcessesTable({ session }) {
-  let rest = "divide-y-2 text-white text-base hover:bg-cyan-950";
-  let processesTable = session.processes.map((proc, index) => (
+  const rest = "divide-y-2 text-white text-base hover:bg-cyan-950";
+  const processesTable = session.processes.map((proc, index) => (
     <Table.Row
       key={index}
       className={`${proc.active ? "bg-sky-800" : ""} ${rest}`}
