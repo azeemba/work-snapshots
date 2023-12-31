@@ -67,7 +67,11 @@ def addSplit(identifier):
 
 @route("/api/worksessions/<identifier:int>", method="GET")
 def work_session_specific(identifier):
-    return makeDetailForFrontend(WORK_SESSIONS[identifier])
+    chosen = None
+    for summary in WORK_SESSIONS_SUMMARY:
+        if summary["id"] == identifier:
+            chosen = summary
+    return makeDetailForFrontend(WORK_SESSIONS[identifier], chosen)
 
 
 @route("/api/worksessions")
