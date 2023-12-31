@@ -19,7 +19,7 @@ from images import prepare_thumbnails
 config = ConfigParser()
 config.read("config.conf")
 db = Db(config)
-root = config["main"]["static"]
+frontend_dir = config["main"]["static"]
 
 
 def loadData():
@@ -89,12 +89,12 @@ def work_sessions_customize(identifier):
 
 @route("/")
 def serve_root():
-    return static_file("/index.html", root=root)
+    return static_file("/index.html", root=frontend_dir)
 
 
 @route("/session/<session>")
 def serve_root_still(session):
-    return static_file("/index.html", root=root)
+    return static_file("/index.html", root=frontend_dir)
 
 
 @error(404)
@@ -116,7 +116,7 @@ def serve_cached(file):
 
 @route("/<path:path>")
 def serve_static(path):
-    return static_file(path, root)
+    return static_file(path, frontend_dir)
 
 
 @route("/api/refresh")
@@ -126,7 +126,7 @@ def refresh_data():
     WORK_SESSIONS, WORK_SESSIONS_SUMMARY = loadData()
 
 
-@route("/exit")
+@route("/api/exit")
 def exit():
     Thread(target=shutdown_server).start()
     return ""
