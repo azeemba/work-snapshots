@@ -1,12 +1,12 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useInView } from "react-intersection-observer";
 import "tailwindcss/tailwind.css";
-import { FaCheck, FaPencilAlt, FaPlus } from "react-icons/fa";
+import { FaCheck, FaPencilAlt } from "react-icons/fa";
 import { FaXmark } from "react-icons/fa6";
 import { Link } from "react-router-dom";
 import { Button, Badge, TextInput, Tooltip } from "flowbite-react";
 
-function SessionCard({ session, availableTags, onEdit }) {
+function SessionSummaryCard({ session, availableTags, onEdit }) {
   const [inEditMode, setEditMode] = useState(false);
   const [editedTitle, setEditedTitle] = useState(session.title);
   const [editedTag, setEditedTag] = useState(session.tag);
@@ -51,7 +51,7 @@ function SessionCard({ session, availableTags, onEdit }) {
   const startDate = session.display_time;
   let duration = `${session.duration_minutes} minutes`;
   if (session.duration_minutes > 60) {
-    let hours = session.duration_minutes / 60;
+    const hours = session.duration_minutes / 60;
     duration = `${hours.toFixed(1)} hours`;
   }
   const link = `session/${session.id}`;
@@ -159,4 +159,4 @@ function SessionCard({ session, availableTags, onEdit }) {
   );
 }
 
-export default SessionCard;
+export default SessionSummaryCard;

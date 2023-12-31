@@ -1,17 +1,17 @@
 import React, { useState } from "react";
 import { useLoaderData, useParams } from "react-router-dom";
-import { SessionDetailCard } from "./sessionDetailCard";
-import { SessionDetailTable } from "./sessionDetailTable";
+import SingleSnapshotCard from "../components/singlesnapshotcard"
+import ProcessesTable from "../components/processestable";
 import { Carousel, Progress, Button } from "flowbite-react";
-import "tailwindcss/tailwind.css";
 
-export async function loader({ params }) {
-  const sessionId = params.sessionId;
-  const details = await fetch(`/api/worksessions/${sessionId}`);
-  return details;
+export async function loader({ params }: {params: {sessionId: string}}) {
+    const sessionId = params.sessionId;
+    const details = await fetch(`/api/worksessions/${sessionId}`);
+    return details;
 }
 
-function Session() {
+
+function WorkSession() {
   const [modalPreviewDetails, requestdModalPreview] = useState({});
   const [activeSessionIndex, changeActiveSessionIndex] = useState(0);
   const details = useLoaderData();
@@ -38,7 +38,7 @@ function Session() {
     window.location.reload(false);
   }
   const cards = timestamps.map((ts) => (
-    <SessionDetailCard
+    <SingleSnapshotCard
       key={ts}
       session={details[ts]}
       timestamp={ts}
@@ -64,11 +64,11 @@ function Session() {
         color="green"
       ></Progress>
       <Button color="failure" className="w-1/3 m-2" onClick={handleSplitClick}>Split!</Button>
-      <SessionDetailTable
+      <ProcessesTable
         session={details[timestamps[activeSessionIndex]]}
-      ></SessionDetailTable>
+      ></ProcessesTable>
     </div>
   );
 }
 
-export default Session;
+export default WorkSession;

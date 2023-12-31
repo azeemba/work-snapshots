@@ -1,10 +1,16 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import { Button, TextInput } from "flowbite-react";
 
-import SessionCard from "./sessionCard";
+export async function loader({ params }: {params: {sessionId: string}}) {
+    const sessionId = params.sessionId;
+    const details = await fetch(`/api/worksessions/${sessionId}`);
+    return details;
+}
 
-export default function WorkSessionsSummary() {
+import SessionSummaryCard from "../components/sessionsummarycard"
+
+export default function WorkSessionsSummaries() {
   const [sessions, setSessions] = useState([]);
   const [availableTags, setAvailableTags] = useState([]);
 
@@ -73,7 +79,7 @@ export default function WorkSessionsSummary() {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {sessions.map((session, i) => (
-          <SessionCard
+          <SessionSummaryCard
             key={i}
             session={session}
             availableTags={availableTags}

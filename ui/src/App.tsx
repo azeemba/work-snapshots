@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from "react";
+import './App.css'
 import { Button, Tooltip } from "flowbite-react";
 import { Outlet, useLocation, Link } from "react-router-dom";
 import "tailwindcss/tailwind.css";
 
 function App() {
-  let location = useLocation();
+  const location = useLocation();
   function refreshClick() {
     fetch("/api/refresh").then(() => {
-      window.location.reload(false);
+      window.location.reload();
     });
   }
 
@@ -42,3 +42,5 @@ function App() {
 }
 
 export default App;
+
+
