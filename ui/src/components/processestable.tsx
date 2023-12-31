@@ -13,7 +13,7 @@ export default function ProcessesTable({ session }) {
   ));
 
   return (
-    <div className="p-4 w-9/12">
+    <div className="p-4 w-full max-w-screen-lg">
       <h2>{session.display_time}</h2>
       <Table hoverable>
         <Table.Head>
