@@ -10,7 +10,7 @@ import { TfiUnlink } from "react-icons/tfi";
 import { MdClose } from "react-icons/md";
 import ProcessesTable from "./processestable";
 
-type SessionSnapshot = {
+export type SessionSnapshot = {
   display_time: string;
   image: string;
   processes: Array<{ process: string; title: string; active: boolean }>;
@@ -18,12 +18,12 @@ type SessionSnapshot = {
 type SnapshotCardArgs = {
   session: SessionSnapshot;
   snapshotId: number;
-  modalPreview: ModalPreviewArgs;
+  modalPreview?: ModalPreviewArgs;
   triggerModalPreview: (data: ModalPreviewArgs) => void;
   splitSessionAtSnapshot: (snapshotId: number) => void;
 };
-type ModalPreviewArgs = {
-  workSessionId?: number;
+export type ModalPreviewArgs = {
+  snapshotId?: number;
   targetUrl?: string;
 };
 
@@ -96,21 +96,20 @@ export default function SingleSnapshotCard({
                     />
                   </TransformComponent>
                   <div className="flex flex-row justify-between py-2">
-                   <Button
+                    <Button
                       className="bg-pink-950"
                       onClick={handleSplitClicked}
                     >
                       <TfiUnlink />
                       <div>Split</div>
                     </Button>
-                  <div className="flex flex-row-reverse gap-2">
-                    <Button onClick={() => triggerModalPreview({})}>
-                      <MdClose />
-                      Close
-                    </Button>
-                    <Button onClick={() => resetTransform()}>Reset</Button>
-                  </div>
- 
+                    <div className="flex flex-row-reverse gap-2">
+                      <Button onClick={() => triggerModalPreview({})}>
+                        <MdClose />
+                        Close
+                      </Button>
+                      <Button onClick={() => resetTransform()}>Reset</Button>
+                    </div>
                   </div>
                 </Fragment>
               )}
@@ -126,7 +125,9 @@ export default function SingleSnapshotCard({
           onClick={launchImage}
         >
           <div className="w-full aspect-video">
-            {inView ? <img src={session.image + "?thumbnail=1"} alt="Session Detail" /> : null}
+            {inView ? (
+              <img src={session.image + "?thumbnail=1"} alt="Session Detail" />
+            ) : null}
           </div>
           <div className="flex flex-row justify-between items-center">
             <p className="text-md text-gray-300">{session.display_time}</p>

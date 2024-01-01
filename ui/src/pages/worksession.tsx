@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { useLoaderData, useParams } from "react-router-dom";
-import SingleSnapshotCard from "../components/singlesnapshotcard";
-import ProcessesTable from "../components/processestable";
-import { Carousel, Progress, Button } from "flowbite-react";
+import SingleSnapshotCard, {
+  ModalPreviewArgs,
+  SessionSnapshot,
+} from "../components/singlesnapshotcard";
+import { Session } from "../components/sessionsummarycard";
 
 export async function loader({ params }: { params: { sessionId: string } }) {
   const sessionId = params.sessionId;
@@ -11,13 +13,25 @@ export async function loader({ params }: { params: { sessionId: string } }) {
   return data;
 }
 
+type SessionDetails = {
+  [id: number]: SessionSnapshot;
+};
+type LoadedData = {
+  session: Session;
+  details: SessionDetails;
+};
+
 function WorkSession() {
-  const [modalPreviewDetails, requestdModalPreview] = useState({});
-  const { session, details } = useLoaderData();
-  const timestamps = Object.keys(details);
+  const [modalPreviewDetails, requestdModalPreview] =
+    useState<ModalPreviewArgs>({});
+  const { session, details } = useLoaderData() as LoadedData;
+  const timestamps = Object.keys(details) as unknown as Array<number>;
   const { sessionId } = useParams();
 
-  function handleTriggerModalPreview({ snapshotId, targetUrl }) {
+  function handleTriggerModalPreview({
+    snapshotId,
+    targetUrl,
+  }: ModalPreviewArgs) {
     requestdModalPreview({
       snapshotId,
       targetUrl: targetUrl,
@@ -42,7 +56,7 @@ function WorkSession() {
       session={details[ts]}
       snapshotId={ts}
       modalPreview={
-        modalPreviewDetails.snapshotId === ts ? modalPreviewDetails : null
+        modalPreviewDetails.snapshotId === ts ? modalPreviewDetails : undefined
       }
       triggerModalPreview={handleTriggerModalPreview}
       splitSessionAtSnapshot={handleSplitClick}

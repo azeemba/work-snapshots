@@ -4,19 +4,10 @@ import "tailwindcss/tailwind.css";
 import { FaCheck, FaPencilAlt } from "react-icons/fa";
 import { FaXmark } from "react-icons/fa6";
 import { Link } from "react-router-dom";
-import { Button, Badge, TextInput, Tooltip } from "flowbite-react";
+import { Button, TextInput, Tooltip } from "flowbite-react";
+import TagBadge, { TagObject } from "./tagbadge";
 
-/*
-"id": w.identifier,
-"start": w.start.timestamp(),
-"end": w.end.timestamp(),
-"display_time": f"{w.start.strftime('%b %d, %Y %I:%M %p')} - {w.end.strftime('%I:%M %p')}",
-"duration_minutes": duration_minutes,
-"title": title,
-"tag": tag,
-"image": f"/cache/{w.preferred_image}.webp",
-*/
-type Session = {
+export type Session = {
   id: number;
   start: number;
   end: number;
@@ -27,38 +18,24 @@ type Session = {
   image: string;
 };
 
-type TagObject = {
-  tag: string;
-};
 type SessionSummaryCardArgs = {
   session: Session;
   availableTags: Array<TagObject>;
   onEdit: (data: { id: number; title: string; tag: string }) => void;
+  onTagClick: (data: { tag: string }) => void;
 };
 
 function SessionSummaryCard({
   session,
   availableTags,
   onEdit,
+  onTagClick,
 }: SessionSummaryCardArgs) {
   const [inEditMode, setEditMode] = useState(false);
   const [editedTitle, setEditedTitle] = useState(session.title);
   const [editedTag, setEditedTag] = useState(session.tag);
   const { ref, inView } = useInView({
     triggerOnce: true,
-  });
-
-  const tagColors: { [id: string]: string } = {};
-  const availableColors = [
-    "info",
-    "warning",
-    "indigo",
-    "purple",
-    "success",
-    "pink",
-  ];
-  availableTags.forEach((element, i) => {
-    tagColors[element.tag] = availableColors[i % availableColors.length];
   });
 
   // Get available tags?
@@ -163,18 +140,14 @@ function SessionSummaryCard({
                 tagDropdown
               ) : (
                 <div className="h-8">
-                  {session.tag ? (
-                    <Badge
-                      color={tagColors[session.tag] || "failure"}
-                      size="sm"
-                    >
-                      {session.tag}
-                    </Badge>
-                  ) : (
-                    <Badge color="gray" size="sm">
-                      Untagged
-                    </Badge>
-                  )}
+                  <TagBadge
+                    availableTags={availableTags}
+                    tag={session.tag}
+                    onClick={(ev) => {
+                      ev.preventDefault();
+                      onTagClick({ tag: session.tag });
+                    }}
+                  />
                 </div>
               )}
               {inEditMode ? (

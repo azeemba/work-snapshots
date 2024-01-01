@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import { Button, TextInput } from "flowbite-react";
+import { Session } from "../components/sessionsummarycard";
 
 export async function loader({ params }: { params: { sessionId: string } }) {
   const sessionId = params.sessionId;
@@ -9,10 +10,12 @@ export async function loader({ params }: { params: { sessionId: string } }) {
 }
 
 import SessionSummaryCard from "../components/sessionsummarycard";
+import TagBadge, { TagObject } from "../components/tagbadge";
 
 export default function WorkSessionsSummaries() {
-  const [sessions, setSessions] = useState([]);
-  const [availableTags, setAvailableTags] = useState([]);
+  const [allSessions, setAllSessions] = useState<Array<Session>>([]);
+  const [selectedTag, setSelectedTag] = useState<string | undefined>(undefined);
+  const [availableTags, setAvailableTags] = useState<Array<TagObject>>([]);
 
   const [shouldShowAddTags, setShowAddTags] = useState(false);
   const [newTagValue, setNewTagValue] = useState("");
@@ -20,13 +23,23 @@ export default function WorkSessionsSummaries() {
   useEffect(() => {
     fetch("/api/worksessions")
       .then((response) => response.json())
-      .then((data) => setSessions(data));
+      .then((data) => {
+        setAllSessions(data);
+      });
     fetch("/api/tags")
       .then((response) => response.json())
       .then((data) => setAvailableTags(data.tags));
   }, []);
 
-  const handleEdit = ({ id, title, tag }) => {
+  const handleEdit = ({
+    id,
+    title,
+    tag,
+  }: {
+    id: number;
+    title: string;
+    tag: string;
+  }) => {
     fetch(`/api/worksessions/${id}`, {
       method: "POST",
       headers: {
@@ -39,11 +52,11 @@ export default function WorkSessionsSummaries() {
     })
       .then((resp) => resp.json())
       .then((resp) => {
-        setSessions(resp);
+        setAllSessions(resp);
       });
   };
 
-  const addNewTag = (ev) => {
+  const addNewTag = () => {
     fetch(`/api/tags/`, {
       method: "PUT",
       headers: {
@@ -60,32 +73,54 @@ export default function WorkSessionsSummaries() {
       });
   };
 
+  const tagClick = ({ tag }: { tag: string }) => {
+    setSelectedTag(tag);
+  };
+
   return (
     <div className="container mx-auto px-2 md:px-0 py-5">
       <div className="h-10 my-2">
-        {shouldShowAddTags ? (
-          <div className="flex flex-row">
-            <TextInput
-              defaultValue={newTagValue}
-              onInput={(e) => setNewTagValue(e.target.value)}
-            ></TextInput>
-            <Button onClick={addNewTag}>Add Tag</Button>
-          </div>
-        ) : (
-          <Button onClick={(e) => setShowAddTags(true)}>
-            <FaPlus />
-          </Button>
-        )}
+        <div className="flex flex-row justify-between">
+          {shouldShowAddTags ? (
+            <div className="flex flex-row gap-1">
+              <TextInput
+                defaultValue={newTagValue}
+                onInput={(e: FormEvent) =>
+                  setNewTagValue((e.target as HTMLInputElement).value)
+                }
+              ></TextInput>
+              <Button onClick={addNewTag}>Add Tag</Button>
+              <Button color="dark" onClick={() => setShowAddTags(false)}>
+                Cancel
+              </Button>
+            </div>
+          ) : (
+            <Button onClick={() => setShowAddTags(true)}>
+              <FaPlus />
+            </Button>
+          )}
+          {selectedTag !== undefined ? (
+            <TagBadge
+              availableTags={availableTags}
+              tag={selectedTag}
+              showClose={true}
+              onClick={() => setSelectedTag(undefined)}
+            />
+          ) : undefined}
+        </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {sessions.map((session, i) => (
-          <SessionSummaryCard
-            key={i}
-            session={session}
-            availableTags={availableTags}
-            onEdit={handleEdit}
-          />
-        ))}
+        {allSessions
+          .filter((s) => !selectedTag || s.tag === selectedTag)
+          .map((session, i) => (
+            <SessionSummaryCard
+              key={i}
+              session={session}
+              availableTags={availableTags}
+              onEdit={handleEdit}
+              onTagClick={tagClick}
+            />
+          ))}
       </div>
     </div>
   );
