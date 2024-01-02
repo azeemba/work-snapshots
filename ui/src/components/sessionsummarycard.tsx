@@ -100,7 +100,7 @@ function SessionSummaryCard({
 
   return (
     <Link to={link}>
-      <Tooltip content={session.title}>
+      <Tooltip content={session.title} placement="bottom">
         <div
           className={
             backgroundColor +

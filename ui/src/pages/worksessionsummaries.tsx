@@ -28,7 +28,11 @@ export default function WorkSessionsSummaries() {
       });
     fetch("/api/tags")
       .then((response) => response.json())
-      .then((data) => setAvailableTags(data.tags));
+      .then((data) => {
+        const tags = data.tags;
+        tags.push({tag: ""})
+        setAvailableTags(tags)
+      });
   }, []);
 
   const handleEdit = ({
@@ -67,22 +71,30 @@ export default function WorkSessionsSummaries() {
       }),
     })
       .then((resp) => resp.json())
-      .then((resp) => setAvailableTags(resp.tags))
+      .then((resp) => {
+        const tags = resp.tags;
+        tags.push({tag: ""})
+        setAvailableTags(tags)
+      })
       .then(() => {
         setShowAddTags(false);
       });
   };
 
   const tagClick = ({ tag }: { tag: string }) => {
-    setSelectedTag(tag);
+    if (selectedTag === tag) {
+      setSelectedTag(undefined);
+    } else {
+      setSelectedTag(tag);
+    }
   };
 
   return (
     <div className="container mx-auto px-2 md:px-0 py-5">
-      <div className="h-10 my-2">
-        <div className="flex flex-row justify-between">
+      <div className="my-2">
+        <div className="flex flex-row flex-wrap justify-between">
           {shouldShowAddTags ? (
-            <div className="flex flex-row gap-1">
+            <div className="flex flex-row gap-2">
               <TextInput
                 defaultValue={newTagValue}
                 onInput={(e: FormEvent) =>
@@ -99,19 +111,26 @@ export default function WorkSessionsSummaries() {
               <FaPlus />
             </Button>
           )}
-          {selectedTag !== undefined ? (
-            <TagBadge
-              availableTags={availableTags}
-              tag={selectedTag}
-              showClose={true}
-              onClick={() => setSelectedTag(undefined)}
-            />
-          ) : undefined}
+          <div className="flex flex-row flex-wrap gap-2">
+            {availableTags
+              .filter((t) => selectedTag === undefined || t.tag === selectedTag)
+              .map((t) => {
+                return (
+                  <TagBadge
+                    key={t.tag}
+                    availableTags={availableTags}
+                    tag={t.tag}
+                    showClose={selectedTag === t.tag}
+                    onClick={() => tagClick(t)}
+                  />
+                );
+              })}
+          </div>
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {allSessions
-          .filter((s) => !selectedTag || s.tag === selectedTag)
+          .filter((s) => selectedTag === undefined || s.tag === selectedTag)
           .map((session, i) => (
             <SessionSummaryCard
               key={i}

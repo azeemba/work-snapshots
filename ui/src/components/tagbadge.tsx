@@ -17,27 +17,32 @@ export default function TagBadge({
   onClick?: MouseEventHandler;
   showClose?: boolean;
 }) {
-  const tagColors: { [id: string]: string } = {};
+  const untaggedColor = "bg-gray-100 text-gray-800";
+  const tagColors: { [id: string]: string } = {
+    "": untaggedColor
+  };
   const availableColors = [
     "bg-slate-900 text-slate-100",
     "bg-red-900 text-red-100",
     "bg-green-900 text-green-100",
-    "bg-orange-900 text-orange-100",
+    "bg-amber-900 text-yellow-100",
     "bg-indigo-900 text-indigo-100",
-    "bg-yellow-900 text-yellow-100",
+    "bg-lime-800 text-lime-100",
     "bg-rose-900 text-rose-100",
-    "bg-lime-700 text-lime-100",
     "bg-purple-900 text-purple-100",
   ];
   availableTags.forEach((element, i) => {
-    tagColors[element.tag] = availableColors[i % availableColors.length];
+    if (element.tag !== "")
+    {
+      tagColors[element.tag] = availableColors[i % availableColors.length];
+    }
   });
 
   const clickHandler: MouseEventHandler = (e) => {
     if (onClick) onClick(e);
   };
 
-  return tag ? (
+  return (
     <Badge
       className={
         tagColors[tag] +
@@ -45,13 +50,9 @@ export default function TagBadge({
       }
       size="sm"
       icon={showClose ? IoMdCloseCircle : undefined}
-      onClick={onClick}
+      onClick={clickHandler}
     >
-      {tag}
-    </Badge>
-  ) : (
-    <Badge color="gray" size="sm" onClick={clickHandler}>
-      Untagged
+      {tag ? tag : "Untagged"}
     </Badge>
   );
 }
