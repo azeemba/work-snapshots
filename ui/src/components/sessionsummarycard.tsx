@@ -6,6 +6,7 @@ import { FaXmark } from "react-icons/fa6";
 import { Link } from "react-router-dom";
 import { Button, TextInput, Tooltip } from "flowbite-react";
 import TagBadge, { TagObject } from "./tagbadge";
+import { displayMinutes } from "../util/time";
 
 export type Session = {
   id: number;
@@ -60,11 +61,7 @@ function SessionSummaryCard({
   );
 
   const startDate = session.display_time;
-  let duration = `${session.duration_minutes} minutes`;
-  if (session.duration_minutes > 60) {
-    const hours = session.duration_minutes / 60;
-    duration = `${hours.toFixed(1)} hours`;
-  }
+  const duration = displayMinutes(session.duration_minutes);
   const link = `session/${session.id}`;
 
   // Function to map the duration to a specific background color class
