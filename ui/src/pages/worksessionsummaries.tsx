@@ -1,39 +1,20 @@
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import { Button, TextInput } from "flowbite-react";
-import { Session } from "../components/sessionsummarycard";
-
-export async function loader({ params }: { params: { sessionId: string } }) {
-  const sessionId = params.sessionId;
-  const details = await fetch(`/api/worksessions/${sessionId}`);
-  return details;
-}
+import { useOutletContext } from "react-router-dom";
 
 import SessionSummaryCard from "../components/sessionsummarycard";
-import TagBadge, { TagObject } from "../components/tagbadge";
+import TagBadge  from "../components/tagbadge";
+import { OutletContextInfo } from "../App";
+
 
 export default function WorkSessionsSummaries() {
-  const [allSessions, setAllSessions] = useState<Array<Session>>([]);
+  const {allSessions, setAllSessions, availableTags, setAvailableTags} = useOutletContext<OutletContextInfo>();
   const [selectedTag, setSelectedTag] = useState<string | undefined>(undefined);
-  const [availableTags, setAvailableTags] = useState<Array<TagObject>>([]);
 
   const [shouldShowAddTags, setShowAddTags] = useState(false);
   const [newTagValue, setNewTagValue] = useState("");
 
-  useEffect(() => {
-    fetch("/api/worksessions")
-      .then((response) => response.json())
-      .then((data) => {
-        setAllSessions(data);
-      });
-    fetch("/api/tags")
-      .then((response) => response.json())
-      .then((data) => {
-        const tags = data.tags;
-        tags.push({tag: ""})
-        setAvailableTags(tags)
-      });
-  }, []);
 
   const handleEdit = ({
     id,

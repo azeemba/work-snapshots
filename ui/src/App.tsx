@@ -1,15 +1,40 @@
 import "./App.css";
 import { Button, Tooltip } from "flowbite-react";
+import { useEffect, useState } from "react";
 import { Outlet, useLocation, Link } from "react-router-dom";
 import "tailwindcss/tailwind.css";
+import { Session } from "./components/sessionsummarycard";
+import { TagObject } from "./components/tagbadge";
 
+export type OutletContextInfo = {
+  allSessions: Array<Session>;
+  setAllSessions: React.Dispatch<React.SetStateAction<Array<Session>>>;
+  availableTags: Array<TagObject>;
+  setAvailableTags: React.Dispatch<React.SetStateAction<Array<TagObject>>>;
+}
 function App() {
   const location = useLocation();
+  const [allSessions, setAllSessions] = useState<Array<Session>>([]);
+  const [availableTags, setAvailableTags] = useState<Array<TagObject>>([]);
   function refreshClick() {
     fetch("/api/refresh").then(() => {
       window.location.reload();
     });
   }
+  useEffect(() => {
+    fetch("/api/worksessions")
+      .then((response) => response.json())
+      .then((data) => {
+        setAllSessions(data);
+      });
+    fetch("/api/tags")
+      .then((response) => response.json())
+      .then((data) => {
+        const tags = data.tags;
+        tags.push({tag: ""})
+        setAvailableTags(tags)
+      });
+  }, []);
 
   return (
     <div className="bg-gradient-to-r from-gray-800 to-gray-900 min-h-screen text-white">
@@ -25,7 +50,11 @@ function App() {
                 Back
               </Button>
             </Link>
-          ) : null}
+          ) : 
+            <Link to="/stats">
+              <Button className="bg-indigo-500 text-indigo-50 hover:bg-indigo-600 transition-colors">Stats</Button>
+            </Link>
+          }
           <Tooltip content="Reloads data from disk.">
             <Button
               className="bg-indigo-500 text-indigo-50 hover:bg-indigo-600 transition-colors"
@@ -36,7 +65,7 @@ function App() {
           </Tooltip>
         </div>
       </nav>
-      <Outlet></Outlet>
+      <Outlet context={{allSessions, setAllSessions, availableTags, setAvailableTags}}></Outlet>
     </div>
   );
 }
