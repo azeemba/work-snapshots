@@ -5,7 +5,7 @@ import TagBadge from "../components/tagbadge";
 
 export default function TagsPage() {
   // Figure out how to get the data
-  const {allSessions, availableTags} = useOutletContext<OutletContextInfo>();
+  const { allSessions, availableTags } = useOutletContext<OutletContextInfo>();
   const aggregateDurationByTags = () => {
     const durations: { [key: string]: number } = {};
     for (const session of allSessions) {
@@ -19,19 +19,21 @@ export default function TagsPage() {
   };
   const durations = aggregateDurationByTags();
   const durationrows = [];
-  const durationPairs = []
+  const durationPairs = [];
   for (const [key, duration] of Object.entries(durations)) {
-    durationPairs.push({key, duration});
+    durationPairs.push({ key, duration });
   }
   durationPairs.sort((a, b) => b.duration - a.duration);
 
-  for (const {key, duration} of durationPairs)
-  {
+  for (const { key, duration } of durationPairs) {
     durationrows.push(
-      <div key={key} className="flex flex-row flex-wrap gap-2 w-full max-w-lg justify-between pt-4">
-        <TagBadge tag={ key } availableTags={availableTags} />
+      <div
+        key={key}
+        className="flex flex-row flex-wrap gap-2 w-full max-w-lg justify-between pt-4"
+      >
+        <TagBadge tag={key} availableTags={availableTags} />
         <div>{displayMinutes(duration)}</div>
-      </div>
+      </div>,
     );
   }
 
@@ -39,13 +41,13 @@ export default function TagsPage() {
 
   // Time spent on each tag in total
   // Time spent on each tag in time period
-  // Time spent changing over time 
+  // Time spent changing over time
 
   return (
     <div className="container mx-auto px-2 py-5">
       <div className="flex flex-col content-center gap-3 divide-y">
-      {durationrows}
+        {durationrows}
+      </div>
     </div>
-  </div>
   );
 }

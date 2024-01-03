@@ -13,9 +13,9 @@ const router = createBrowserRouter([
     path: "/",
     element: <App />,
     children: [
-      { 
+      {
         path: "/",
-        element: <WorkSessionsSummaries />
+        element: <WorkSessionsSummaries />,
       },
       {
         path: "/session/:sessionId",
@@ -24,8 +24,8 @@ const router = createBrowserRouter([
       },
       {
         path: "/stats",
-        element: <TagsPage/>
-      }
+        element: <TagsPage />,
+      },
     ],
   },
 ]);

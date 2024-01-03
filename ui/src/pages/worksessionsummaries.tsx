@@ -4,17 +4,16 @@ import { Button, TextInput } from "flowbite-react";
 import { useOutletContext } from "react-router-dom";
 
 import SessionSummaryCard from "../components/sessionsummarycard";
-import TagBadge  from "../components/tagbadge";
+import TagBadge from "../components/tagbadge";
 import { OutletContextInfo } from "../App";
 
-
 export default function WorkSessionsSummaries() {
-  const {allSessions, setAllSessions, availableTags, setAvailableTags} = useOutletContext<OutletContextInfo>();
+  const { allSessions, setAllSessions, availableTags, setAvailableTags } =
+    useOutletContext<OutletContextInfo>();
   const [selectedTag, setSelectedTag] = useState<string | undefined>(undefined);
 
   const [shouldShowAddTags, setShowAddTags] = useState(false);
   const [newTagValue, setNewTagValue] = useState("");
-
 
   const handleEdit = ({
     id,
@@ -54,8 +53,8 @@ export default function WorkSessionsSummaries() {
       .then((resp) => resp.json())
       .then((resp) => {
         const tags = resp.tags;
-        tags.push({tag: ""})
-        setAvailableTags(tags)
+        tags.push({ tag: "" });
+        setAvailableTags(tags);
       })
       .then(() => {
         setShowAddTags(false);

@@ -19,7 +19,7 @@ export default function TagBadge({
 }) {
   const untaggedColor = "bg-gray-100 text-gray-800";
   const tagColors: { [id: string]: string } = {
-    "": untaggedColor
+    "": untaggedColor,
   };
   const availableColors = [
     "bg-slate-900 text-slate-100",
@@ -32,8 +32,7 @@ export default function TagBadge({
     "bg-purple-900 text-purple-100",
   ];
   availableTags.forEach((element, i) => {
-    if (element.tag !== "")
-    {
+    if (element.tag !== "") {
       tagColors[element.tag] = availableColors[i % availableColors.length];
     }
   });

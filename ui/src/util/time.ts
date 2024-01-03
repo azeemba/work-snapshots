@@ -1,4 +1,3 @@
-
 export function displayMinutes(minutes: number) {
   let duration = `${minutes} minutes`;
   if (minutes > 60) {

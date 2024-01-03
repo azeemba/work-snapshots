@@ -11,7 +11,7 @@ export type OutletContextInfo = {
   setAllSessions: React.Dispatch<React.SetStateAction<Array<Session>>>;
   availableTags: Array<TagObject>;
   setAvailableTags: React.Dispatch<React.SetStateAction<Array<TagObject>>>;
-}
+};
 function App() {
   const location = useLocation();
   const [allSessions, setAllSessions] = useState<Array<Session>>([]);
@@ -31,8 +31,8 @@ function App() {
       .then((response) => response.json())
       .then((data) => {
         const tags = data.tags;
-        tags.push({tag: ""})
-        setAvailableTags(tags)
+        tags.push({ tag: "" });
+        setAvailableTags(tags);
       });
   }, []);
 
@@ -50,11 +50,13 @@ function App() {
                 Back
               </Button>
             </Link>
-          ) : 
+          ) : (
             <Link to="/stats">
-              <Button className="bg-indigo-500 text-indigo-50 hover:bg-indigo-600 transition-colors">Stats</Button>
+              <Button className="bg-indigo-500 text-indigo-50 hover:bg-indigo-600 transition-colors">
+                Stats
+              </Button>
             </Link>
-          }
+          )}
           <Tooltip content="Reloads data from disk.">
             <Button
               className="bg-indigo-500 text-indigo-50 hover:bg-indigo-600 transition-colors"
@@ -65,7 +67,14 @@ function App() {
           </Tooltip>
         </div>
       </nav>
-      <Outlet context={{allSessions, setAllSessions, availableTags, setAvailableTags}}></Outlet>
+      <Outlet
+        context={{
+          allSessions,
+          setAllSessions,
+          availableTags,
+          setAvailableTags,
+        }}
+      ></Outlet>
     </div>
   );
 }
