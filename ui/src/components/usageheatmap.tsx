@@ -13,17 +13,25 @@ export default function UsageHeatmap({
   dayWeekMap: HeatmapAllData;
 }) {
   const dayNames = ["S", "M", "Tu", "W", "Th", "F", "S"];
-  let earliestWeek = "2222";
-  const series2 = dayWeekMap
+  const allUniqueDates = new Set(
+    dayWeekMap.map((weeks) => Object.keys(weeks)).flat()
+  );
+
+  const series = dayWeekMap
     .map((weeks, i) => {
+      for (const d of allUniqueDates) {
+        if (weeks[d] === undefined) {
+          weeks[d] = 0;
+        }
+      }
       return {
         name: dayNames[i],
         index: i,
         data: Object.keys(weeks)
           .map((weekStart) => {
-            if (weekStart < earliestWeek) earliestWeek = weekStart;
+            const label = new Date(Number(weekStart)).toLocaleDateString();
             return {
-              x: new Date(Number(weekStart)).toLocaleDateString(),
+              x: label,
               y: Math.round(weeks[weekStart] / 6) / 10,
               o: Number(weekStart),
             };
@@ -32,6 +40,7 @@ export default function UsageHeatmap({
       };
     })
     .sort((a, b) => b.index - a.index);
+
   const options = {
     chart: {
       height: 350,
@@ -65,7 +74,7 @@ export default function UsageHeatmap({
 
   return (
     <div className="h-[220px] md:h-[300px] lg:h-[400px] w-full">
-      <Chart type="heatmap" options={options} series={series2} height="100%" />
+      <Chart type="heatmap" options={options} series={series} height="100%" />
     </div>
   );
 }
