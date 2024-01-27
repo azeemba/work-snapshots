@@ -13,7 +13,9 @@
     "typecheck": "tsc"
   },
   "dependencies": {
+    "apexcharts": "^3.45.2",
     "react": "^18.2.0",
+    "react-apexcharts": "^1.4.1",
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
