@@ -74,10 +74,15 @@ export default function TagsPage() {
       const week = getSundayForThatWeek(start);
 
       const curDay = dayWeekCount.at(dayIndex);
-      if (curDay === undefined) continue;
+      if (curDay === undefined) {
+        console.log("Magical day? Can't continue.", session);
+        continue;
+      }
 
       if (dontCount) {
-        curDay[week] = 0;
+        // Don't aggregate but add a 0 field so that
+        // the calendar doesn't shift when tags are changed
+        if (curDay[week] == undefined) curDay[week] = 0;
       } else if (curDay[week]) {
         curDay[week] += session.duration_minutes;
       } else {
