@@ -20,6 +20,7 @@ ProgramList := [
     "Resolve.exe",
     "unity.exe",
     "WindowsTerminal.exe",
+    "JupyterLab.exe",
 ]
 ForceTrackFlag := false
 ForceIgnoreFlag := false
@@ -50,6 +51,7 @@ CaptureAndSaveScreenshot() {
         if (IsProgramRunning(ProgramName) && A_TimeIdle < 120000) {
             Screenshot(timestamp)
             WriteOpenWindowsPy(OutputDir "\open-windows.csv", timestamp)
+            SoundPlay "nice-camera-click-106269.mp3", 1
             break
         }
     }
