@@ -21,10 +21,15 @@ type SnapshotCardArgs = {
   modalPreview?: ModalPreviewArgs;
   triggerModalPreview: (data: ModalPreviewArgs) => void;
   splitSessionAtSnapshot: (snapshotId: number) => void;
+  neighbors: Neighbors;
 };
 export type ModalPreviewArgs = {
   snapshotId?: number;
   targetUrl?: string;
+};
+export type Neighbors = {
+  prev: ModalPreviewArgs;
+  next: ModalPreviewArgs;
 };
 
 export default function SingleSnapshotCard({
@@ -33,6 +38,7 @@ export default function SingleSnapshotCard({
   modalPreview,
   triggerModalPreview,
   splitSessionAtSnapshot,
+  neighbors,
 }: SnapshotCardArgs) {
   const { ref, inView } = useInView({
     triggerOnce: true, // image will load once and won't unload
@@ -64,7 +70,7 @@ export default function SingleSnapshotCard({
         <Modal.Header>{session.display_time}</Modal.Header>
         <Modal.Body>
           <div className="h-[75vh]">
-            <TransformWrapper initialScale={2} centerOnInit={true}>
+            <TransformWrapper initialScale={1} centerOnInit={true}>
               {({ resetTransform }) => (
                 <Fragment>
                   <div
@@ -93,6 +99,7 @@ export default function SingleSnapshotCard({
                     <img
                       src={modalPreview && modalPreview.targetUrl}
                       alt="A zoomable version"
+                      onLoad={() => resetTransform()}
                     />
                   </TransformComponent>
                   <div className="flex flex-row justify-between py-2">
@@ -109,6 +116,18 @@ export default function SingleSnapshotCard({
                         Close
                       </Button>
                       <Button onClick={() => resetTransform()}>Reset</Button>
+                      <Button
+                        disabled={!neighbors.next.snapshotId}
+                        onClick={() => triggerModalPreview(neighbors.next)}
+                      >
+                        Next
+                      </Button>
+                      <Button
+                        disabled={!neighbors.prev.snapshotId}
+                        onClick={() => triggerModalPreview(neighbors.prev)}
+                      >
+                        Prev
+                      </Button>
                     </div>
                   </div>
                 </Fragment>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { KeyboardEvent, useState } from "react";
 import { useLoaderData, useParams } from "react-router-dom";
 import SingleSnapshotCard, {
   ModalPreviewArgs,
@@ -50,6 +50,20 @@ function WorkSession() {
     console.log("Split added. Will refresh instead of being clever.");
     window.location.reload();
   }
+  function makeNext(ts: number) {
+    const i = timestamps.indexOf(ts);
+    if (i + 1 >= timestamps.length) return {};
+    const target = timestamps[i + 1];
+    const image = details[target].image;
+    return { snapshotId: target, targetUrl: image };
+  }
+  function makePrev(ts: number) {
+    const i = timestamps.indexOf(ts);
+    if (i <= 0) return {};
+    const target = timestamps[i - 1];
+    const image = details[target].image;
+    return { snapshotId: target, targetUrl: image };
+  }
   const cards = timestamps.map((ts) => (
     <SingleSnapshotCard
       key={ts}
@@ -60,10 +74,27 @@ function WorkSession() {
       }
       triggerModalPreview={handleTriggerModalPreview}
       splitSessionAtSnapshot={handleSplitClick}
+      neighbors={{
+        prev: makePrev(ts),
+        next: makeNext(ts),
+      }}
     />
   ));
+  function handleKeyPress(ev: KeyboardEvent) {
+    if (modalPreviewDetails.snapshotId) {
+      // We have a modal view up
+      if (ev.key == "ArrowRight") {
+        handleTriggerModalPreview(makeNext(modalPreviewDetails.snapshotId));
+      } else if (ev.key == "ArrowLeft") {
+        handleTriggerModalPreview(makePrev(modalPreviewDetails.snapshotId));
+      }
+    }
+  }
   return (
-    <div className="bg-gray-900 min-h-screen text-white flex justify-center flex-col">
+    <div
+      className="bg-gray-900 min-h-screen text-white flex justify-center flex-col"
+      onKeyDown={handleKeyPress}
+    >
       <h1 className="text-2xl ml-3">{session.title}</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         {cards}

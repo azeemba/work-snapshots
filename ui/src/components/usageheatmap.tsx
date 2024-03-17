@@ -14,7 +14,7 @@ export default function UsageHeatmap({
 }) {
   const dayNames = ["S", "M", "Tu", "W", "Th", "F", "S"];
   const allUniqueDates = new Set(
-    dayWeekMap.map((weeks) => Object.keys(weeks)).flat()
+    dayWeekMap.map((weeks) => Object.keys(weeks)).flat(),
   );
 
   const series = dayWeekMap

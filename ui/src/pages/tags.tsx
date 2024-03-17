@@ -51,7 +51,7 @@ export default function TagsPage() {
           showClose={chosenTag == key}
         />
         <div>{displayMinutes(duration)}</div>
-      </div>
+      </div>,
     );
   }
 
