@@ -4,7 +4,7 @@ import "tailwindcss/tailwind.css";
 import { FaCheck, FaPencilAlt } from "react-icons/fa";
 import { FaXmark } from "react-icons/fa6";
 import { Link } from "react-router-dom";
-import { Button, TextInput, Tooltip } from "flowbite-react";
+import { Button, TextInput } from "flowbite-react";
 import TagBadge, { TagObject } from "./tagbadge";
 import { displayMinutes } from "../util/time";
 
@@ -97,7 +97,6 @@ function SessionSummaryCard({
 
   return (
     <Link to={link}>
-      <Tooltip content={session.title} placement="bottom">
         <div
           className={
             backgroundColor +
@@ -168,7 +167,6 @@ function SessionSummaryCard({
             </div>
           </div>
         </div>
-      </Tooltip>
     </Link>
   );
 }
