@@ -4,7 +4,7 @@ import {
   MiniMap,
 } from "react-zoom-pan-pinch";
 import { useInView } from "react-intersection-observer";
-import { Modal, Button, Tooltip } from "flowbite-react";
+import { Modal, Button } from "flowbite-react";
 import { Fragment, MouseEvent } from "react";
 import { TfiUnlink } from "react-icons/tfi";
 import { MdClose } from "react-icons/md";
@@ -137,7 +137,6 @@ export default function SingleSnapshotCard({
           <ProcessesTable session={session}></ProcessesTable>
         </Modal.Body>
       </Modal>
-      <Tooltip content={session.display_time} placement="bottom">
         <div
           className="bg-sky-900 flex-1 border-4 border-transparent rounded-md cursor-pointer transition-all duration-300 ease-in-out hover:border-indigo-500"
           ref={ref}
@@ -157,7 +156,6 @@ export default function SingleSnapshotCard({
           </div>
           <p className="h-6 overflow-hidden">{activeProcess?.title}</p>
         </div>
-      </Tooltip>
     </div>
   );
 }
