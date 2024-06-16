@@ -24,7 +24,7 @@ frontend_dir = config["main"]["static"]
 
 
 def loadData():
-    sessions = prep(config["main"]["data"])
+    sessions = prep(db)
     addWorkSessionSplits(sessions, db.get_all_splits())
     summary = makeSummaryForFrontend(sessions, db.get_all_overrides())
     imageHandler.prepare_thumbnails(sessions)

@@ -20,6 +20,14 @@ class Db:
     def close(self):
         self.connection.close()
 
+    def get_all_processes(self):
+        res = self.connection.execute("SELECT datetime, process, title, isActive, recordFrequencySeconds FROM snapshot_processes")
+        rows = []
+        for row in res:
+            # Keys match what the code was using in CSV
+            rows.append({"Datetime": row[0], "Process": row[1], "Title": row[2], "IsActive": row[3], "RecordFreqSeconds": row[4]})
+        return rows
+
     def get_all_overrides(self):
         res = self.connection.execute(
             "SELECT identifier, title, tag FROM session_overrides"

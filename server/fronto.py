@@ -107,13 +107,13 @@ def makeSummaryForFrontend(
 
 def makeDetailForFrontend(workSession: WorkSession, lightSession):
     detailed_snapshots = {}
-    for timestamp, processes in workSession.snapshots.items():
-        if not processes:
+    for timestamp, snapshot in workSession.snapshots.items():
+        if not snapshot:
             continue
         current = []
-        timestamp = processes[0].timestamp
-        timestamp_original = processes[0].timestamp_original
-        for p in processes:
+        timestamp = snapshot.timestamp
+        timestamp_original = snapshot.timestamp_original
+        for p in snapshot.processes:
             current.append(
                 {"process": p.process, "title": p.title, "active": p.isActive}
             )

@@ -7,17 +7,24 @@ import time
 
 from typing import Any
 
+from db_handler import Db
+
 
 @dataclass
 class Process:
-    timestamp: datetime
-    timestamp_original: str
     process: str
     title: str
     isActive: bool
 
+@dataclass
+class SnapshotSingle:
+    timestamp: datetime
+    processes: list[Process]
+    timestamp_original: str
+    record_frequency_seconds: int
 
-Snapshots = dict[datetime, list[Process]]
+
+Snapshots = dict[datetime, SnapshotSingle]
 
 
 def clean_title(title: str):
@@ -39,8 +46,8 @@ class WorkSession:
         # choose window most active
         # Assumes that title don't change for important activity
         active_counts = defaultdict(int)
-        for processes in snapshots.values():
-            for p in processes:
+        for s in snapshots.values():
+            for p in s.processes:
                 if p.isActive:
                     active_counts[p.title] += 1
 
@@ -60,10 +67,10 @@ class WorkSession:
             # start in the middle
             # and look for a timestep where mostActiveTitle is active
             for direction in [-1, 1]:
-                processes = snapshots[timesteps[mid + direction * i]]
-                for p in processes:
+                snapshot = snapshots[timesteps[mid + direction * i]]
+                for p in snapshot.processes:
                     if p.isActive and clean_title(p.title) == mostActiveTitle:
-                        return p.timestamp_original
+                        return snapshot.timestamp_original
 
         return ""
 
@@ -76,33 +83,26 @@ def strToDatetime(name):
     return dt
 
 
-def prep(filepath, config=None) -> WorkSessionsDict:
-    groupedByTime = readData(filepath, config)
+def prep(db, config=None) -> WorkSessionsDict:
+    groupedByTime = readData(db, config)
     sessions = groupIntoSessions(groupedByTime, config)
     return sessions
 
 
-def readData(filepath, config=None) -> Snapshots:
+def readData(db: Db, config=None) -> Snapshots:
     start = time.monotonic_ns()
-    byTime = defaultdict(list)
-    with open(filepath, "r", encoding="utf-8-sig") as csvfile:
-        dialect = csv.Sniffer().sniff(csvfile.read(1024))
-        csvfile.seek(0)
-        reader = csv.DictReader(csvfile, dialect=dialect)
-        count = 0
-        for row in reader:
-            dt = strToDatetime(row["Datetime"])
-            p = Process(
-                dt,
-                row["Datetime"],
-                row["Process"],
-                row["Title"],
-                row["IsActive"] == "1",
-            )
-            byTime[dt].append(p)
-            count += 1
-            if count == 5:
-                print(byTime)
+    byTime: Snapshots = {}
+    processes = db.get_all_processes()
+    for row in processes:
+        dt = strToDatetime(row["Datetime"])
+        p = Process(
+            row["Process"],
+            row["Title"],
+            row["IsActive"] == 1,
+        )
+        if dt not in byTime:
+            byTime[dt] = SnapshotSingle(dt, [], row["Datetime"], row["RecordFreqSeconds"]) # TODO
+        byTime[dt].processes.append(p)
 
     print(f"Took {(time.monotonic_ns() - start)/1e9} seconds to read all data")
     return byTime
@@ -135,7 +135,7 @@ def groupIntoSessions(groupedByTime: Snapshots, config=None) -> WorkSessionsDict
             datetime2key(start_timestamp),
             start_timestamp,
             last_timestamp,
-            timedelta(minutes=len(current_session) * 5),  # 5 minutes for each snapshot
+            timedelta(seconds=sum(x.record_frequency_seconds for x in current_session.values())),
             title,
             WorkSession.pickImageTimestamp(current_session, title),
             current_session,
