@@ -56,6 +56,8 @@ can look through the work sessions/screenshots.
 cd server
 python -m venv .venv
 .venv/Scripts/pip install -r requirements.txt
+# Also create the sqlite database
+.venv/Scripts/python setup_db.py
 ```
 
 Then you can start the server with:
