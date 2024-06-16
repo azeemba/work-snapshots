@@ -3,6 +3,7 @@
 ; Set the directory where screenshots will be saved
 OutputDir := "E:\QuickBackups\daily-captures"
 PythonHelper := "C:/Users/Z/Projects/work-snapshots/"
+Wait_Seconds := 300
 
 ; Create the directory if it doesn't exist
 if not DirExist(OutputDir)
@@ -34,8 +35,8 @@ Screenshot(timestamp) {
     cmd := PythonHelper "/.venv/Scripts/python.exe " PythonHelper "/src/take_screenshot.py " OutputDir " -t " timestamp
     Run(cmd, , "Hide")
 }
-WriteOpenWindowsPy(csv_file, timestamp) {
-    cmd := PythonHelper "/.venv/Scripts/python.exe " PythonHelper "/src/get_windows.py " csv_file " " timestamp
+WriteOpenWindowsPy(storage_file, timestamp) {
+    cmd := PythonHelper "/.venv/Scripts/python.exe " PythonHelper "/src/get_windows.py " storage_file " " timestamp " --frequency-seconds " Wait_Seconds
     Run(cmd, , "Hide")
 }
 
@@ -50,7 +51,7 @@ CaptureAndSaveScreenshot() {
         ; and we haven't been idle for 2 mins
         if (IsProgramRunning(ProgramName) && A_TimeIdle < 120000) {
             Screenshot(timestamp)
-            WriteOpenWindowsPy(OutputDir "\open-windows.csv", timestamp)
+            WriteOpenWindowsPy(OutputDir "\sessions.sqlite3", timestamp)
             SoundPlay "nice-camera-click-106269.mp3", 1
             break
         }
@@ -95,11 +96,11 @@ EnableForceIgnoreMode(ItemName, ItemPos, MyMenu) {
         MyMenu.Uncheck(ItemName)
     }
 }
-SetTimer(CaptureAndSaveScreenshot, 300000) ; 5 mins in milliseconds
+SetTimer(CaptureAndSaveScreenshot, Wait_Seconds*1000) ; in milliseconds
 
 StatusCheck() {
     if (ForceIgnoreFlag) {
         TrayTip "Daily Capture is Suspended",,"Mute"
     }
 }
-SetTimer(StatusCheck, 120*1000)
+SetTimer(StatusCheck, Wait_Seconds*1000)
