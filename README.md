@@ -1,29 +1,22 @@
-Work Sessions
+Work Snapshots
 ==============
 
 If [Windows Recall](https://www.theverge.com/2024/6/13/24178144/microsoft-windows-ai-recall-feature-delay)
 was not secure enough for you, here is the same feature set implemented by a
 random guy who you should trust even less.
 
-Features:
-- Take screenshots evey few mins if any "important" application is running
+I built this so I could have a fun record of my progress through my side projects.
+Though, it has also turned out to be useful in tracking the time I spend on different projects.
+
+### Features
+- Take screenshots evey few mins if any "interesting" application is running
   - A camera sound is played everytime a screenshot is taken
-  - You can configure which applications count as important
-- Tag sessions with a project to track time spent on different projects
-- Manually disable recording even when "important" applications are running
+  - You can configure which applications count as "interesting"
+- Add tags for different project to track time spent on them
+- Manually disable recording even when "interesting" applications are running
 
-Problems:
-- Set up is manual (need to create two python virtual environments and a node environment)
-- Windows only
-- Screenshots and process data is stored in plaintext! You have to make sure sensitive
-things aren't getting recorded.
 
-Requires:
-- AutoHotKey
-- Python3
-- Node
-
-## Screenshots
+### Screenshots
 
 The home page of the dashboard shows a set of "work sessions" which is a series
 of snapshots grouped together. So you know how long you worked on a specific thing
@@ -44,6 +37,18 @@ that match a hardcoded list. You can disable recording even
 when those applications are open by clicking "Force Ignore Activity"
 
 ![Tray Icon showing a list of options](demo/tray.png)
+
+### Problems
+- Set up is manual (need to create two python virtual environments and a node environment)
+- Windows only
+- Screenshots and process data is stored in plaintext! You have to make sure sensitive
+things aren't getting recorded.
+
+### Requires:
+- AutoHotKey
+- Python3
+- Node
+
 
 ## Tray
 
@@ -116,6 +121,7 @@ cd ui
 npm install
 npm run build
 ```
+
 
 ## FAQs
 
