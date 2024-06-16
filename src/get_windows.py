@@ -3,14 +3,17 @@ import time
 import pathlib
 import argparse
 import pywinctl
+import sqlite3
+from contextlib import closing
 
 from datatypes import Process
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Write windows to CSV file")
-    parser.add_argument("csv_file", help="Path to the CSV file", type=pathlib.Path)
+    parser = argparse.ArgumentParser(description="Write windows to sqlite file")
+    parser.add_argument("sqlite_file", help="Path to the sqlite file", type=pathlib.Path)
     parser.add_argument("timestamp", help="Identifier for the current time", type=str)
     parser.add_argument("-p", "--filtered-process", help="Process name(s) to filter out", action='append', default=[])
+    parser.add_argument("-k", "--frequency-seconds", help="How long since the last check?", default=300)
 
     return parser.parse_args()
 
@@ -38,18 +41,21 @@ def get_current_windows(filter_list: list[str]):
 
     return data
 
-def write_processes(csv_path: pathlib.Path, processes: list[Process], timestamp: str):
+def write_processes(csv_path: pathlib.Path, processes: list[Process], timestamp: str, frequency_seconds):
     filepath = csv_path
-    csv_rows = []
+    db_data = []
     for p in processes:
         name = p.name.replace(",", "")
         title = p.title.replace(",", "")
         isActive = "1" if p.isActive else "0"
-        # writing naively for now. Will change to db later anyways.
-        csv_rows.append(f"{timestamp}, {name}, {title}, {isActive}\n")
+        db_data.append((timestamp, name, title, isActive, frequency_seconds))
 
-    with open(filepath, "a", encoding="utf-8") as fh:
-        fh.writelines(csv_rows)
+    with closing(sqlite3.connect(filepath)) as db:
+        db.executemany("""INSERT INTO snapshot_processes
+                    (datetime, process, title, isActive, recordFrequencySeconds)
+                    VALUES(?, ?, ?, ?, ?)
+                """, db_data)
+        db.commit()
 
 
 if __name__ == "__main__":
@@ -58,4 +64,4 @@ if __name__ == "__main__":
     w = get_current_windows(args.filtered_process)
     print(w)
 
-    write_processes(args.csv_file, w, args.timestamp)
+    write_processes(args.sqlite_file, w, args.timestamp, args.frequency_seconds)
