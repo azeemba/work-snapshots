@@ -1,5 +1,0 @@
-pillow
-pystray
-PySimpleGUI
-psutil
-PyWinCtl 

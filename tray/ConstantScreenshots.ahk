@@ -2,8 +2,9 @@
 
 ; Set the directory where screenshots will be saved
 OutputDir := "E:\QuickBackups\daily-captures"
-PythonHelper := "C:/Users/Z/Projects/work-snapshots/"
+PythonHelper := A_ScriptDir
 Wait_Seconds := 120
+DEBUG := false
 
 ; Create the directory if it doesn't exist
 if not DirExist(OutputDir)
@@ -32,11 +33,11 @@ IsProgramRunning(ProgramName) {
 }
 
 Screenshot(timestamp) {
-    cmd := PythonHelper "/.venv/Scripts/python.exe " PythonHelper "/src/take_screenshot.py " OutputDir " -t " timestamp
+    cmd := PythonHelper "/.venv/Scripts/python.exe " PythonHelper "/take_screenshot.py " OutputDir " -t " timestamp
     Run(cmd, , "Hide")
 }
 WriteOpenWindowsPy(storage_file, timestamp) {
-    cmd := PythonHelper "/.venv/Scripts/python.exe " PythonHelper "/src/get_windows.py " storage_file " " timestamp " --frequency-seconds " Wait_Seconds
+    cmd := PythonHelper "/.venv/Scripts/python.exe " PythonHelper "/get_windows.py " storage_file " " timestamp " --frequency-seconds " Wait_Seconds
     Run(cmd, , "Hide")
 }
 
@@ -58,15 +59,18 @@ CaptureAndSaveScreenshot() {
     }
 }
 
-; Do some cleanup of default options
-A_TrayMenu.Delete("1&") ; Open
-A_TrayMenu.Delete("1&") ; Help
-A_TrayMenu.Delete("1&") ; Line
-A_TrayMenu.Delete("1&") ; WindowSpy
-A_TrayMenu.Delete("2&") ; Edit Script
-A_TrayMenu.Delete("4&") ; Pause Script
-A_TrayMenu.Delete("3&") ; Suspend Hot Keys
-; Goal is to keep reload and exit
+if (not DEBUG)
+{
+    ; Do some cleanup of default options
+    A_TrayMenu.Delete("1&") ; Open
+    A_TrayMenu.Delete("1&") ; Help
+    A_TrayMenu.Delete("1&") ; Line
+    A_TrayMenu.Delete("1&") ; WindowSpy
+    A_TrayMenu.Delete("2&") ; Edit Script
+    A_TrayMenu.Delete("4&") ; Pause Script
+    A_TrayMenu.Delete("3&") ; Suspend Hot Keys
+    ; Goal is to keep reload and exit
+}
 
 A_TrayMenu.Add()
 
@@ -97,6 +101,10 @@ EnableForceIgnoreMode(ItemName, ItemPos, MyMenu) {
     }
 }
 SetTimer(CaptureAndSaveScreenshot, Wait_Seconds*1000) ; in milliseconds
+if (DEBUG)
+{
+    CaptureAndSaveScreenshot()
+}
 
 StatusCheck() {
     if (ForceIgnoreFlag) {
