@@ -3,7 +3,7 @@
 ; Set the directory where screenshots will be saved
 OutputDir := "E:\QuickBackups\daily-captures"
 PythonHelper := "C:/Users/Z/Projects/work-snapshots/"
-Wait_Seconds := 300
+Wait_Seconds := 120
 
 ; Create the directory if it doesn't exist
 if not DirExist(OutputDir)
