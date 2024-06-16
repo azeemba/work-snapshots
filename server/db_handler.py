@@ -38,7 +38,6 @@ class Db:
             tag: str = row[2] if row[2] else ""
             overrides[row[0]] = SessionOverride(row[0], row[1], tag)
 
-        print(overrides)
         return overrides
 
     def add_override(self, identifer, title, tag):

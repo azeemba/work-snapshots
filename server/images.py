@@ -43,7 +43,7 @@ class ImageHandler:
 
         original_path = Path(self.image_path, imageName)
         if not original_path.exists():
-            print(f"Origina file doesn't exist: {original_path}.")
+            print(f"Original file doesn't exist: {original_path}.")
             return
 
         target_path = Path(self.cache_path, imageName)
