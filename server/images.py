@@ -12,9 +12,12 @@ class ImageHandler:
     def __init__(self, config):
         self.image_path = config["main"]["images"]
         self.cache_path = config["main"]["cache"]
+        cache_dir = Path(self.cache_path)
+        cache_dir.mkdir(exist_ok=True)
+
         self.thumbnail_size = config.getint("ui", "thumbnail_size")
         self.cached_images = set(
-            str(s.name) for s in Path(self.cache_path).glob("*.webp")
+            str(s.name) for s in cache_dir.glob("*.webp")
         )
 
     def prepare_thumbnails(self, workSessions: WorkSessionsDict):
