@@ -1,6 +1,16 @@
 Work Snapshots
 ==============
 
+If [Windows Recall](https://www.theverge.com/2024/6/13/24178144/microsoft-windows-ai-recall-feature-delay)
+was not secure enough for you, here is the same feature set implemented by a random guy who you should trust
+even less.
+
+Features:
+- Take screenshots evey few mins if any "important" application is running
+  - A camera sound is played everytime a screenshot is taken
+- Configure which applications count as important
+- Tag a collection of snapshots with a project to track time spent on different projects
+- Manually disable recording even when "important" applications are running
 
 Requires:
 - AutoHotKey
@@ -52,4 +62,27 @@ Then you can start the server with:
 
 ```sh
 .venv/Scripts/python -m bottle -b 0.0.0.0 main
+```
+
+### Config for Server
+
+`server/config.conf` has a few different parameters that can be configured.
+
+Some important things:
+
+- Where the frontend code is
+- Where the sqlite database is
+- Where the screenshots are
+
+
+## UI
+
+React based frontend to peruse work sessions and individual snapshots.
+
+### Set up for UI
+
+```sh
+cd ui
+npm install
+npm run build
 ```
