@@ -116,3 +116,22 @@ cd ui
 npm install
 npm run build
 ```
+
+## FAQs
+
+### Why windows only?
+
+It's hard to write generic logic to pull information on what UI applications the user is
+running.
+
+`server/` and `ui/` are fully generic. You would only have to replace the `tray/` part
+if you wanted to make it work on another platform.
+
+### Can I request a feature? Can I send you a PR?
+
+You can open an issue if you want ideas or pointers on how to implement something. It's
+very unlikely that I am going to implement it.
+
+I am also unlikely to accept major PRs here.
+Feel free to fork this project and make your own version! 
+You can share your forks in issues as well.
