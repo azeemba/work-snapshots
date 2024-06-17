@@ -45,7 +45,7 @@ function SessionSummaryCard({
       <select
         id="countries"
         className="bg-gray-50 border border-gray-300 text-gray-900 text-xs rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full p-2"
-        value={session.tag}
+        value={editedTag}
         onClick={(e) => e.preventDefault()}
         onChange={(e) => setEditedTag(e.target.value)}
       >
