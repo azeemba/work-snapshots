@@ -38,12 +38,10 @@ class ImageHandler:
 
     def _prepare_single_thumbnail(self, size, imageName):
         if imageName in self.cached_images:
-            print(f"Thumbnail already exists: {imageName}.")
             return
 
         original_path = Path(self.image_path, imageName)
         if not original_path.exists():
-            print(f"Original file doesn't exist: {original_path}.")
             return
 
         target_path = Path(self.cache_path, imageName)

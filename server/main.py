@@ -4,7 +4,7 @@ import json
 import time
 import os
 import signal
-from threading import Thread
+from threading import Thread, Lock, Event
 
 from typing import cast
 
@@ -18,12 +18,13 @@ from images import ImageHandler
 
 config = ConfigParser()
 config.read("config.conf")
-db = Db(config)
 imageHandler = ImageHandler(config)
 frontend_dir = config["main"]["static"]
 
 
 def loadData():
+    print("Fetching data")
+    db = Db(config)
     sessions = prep(db)
     addWorkSessionSplits(sessions, db.get_all_splits())
     summary = makeSummaryForFrontend(sessions, db.get_all_overrides())
@@ -31,11 +32,22 @@ def loadData():
     return sessions, summary
 
 
+WORK_DATA_LOCK = Lock()
 WORK_SESSIONS, WORK_SESSIONS_SUMMARY = loadData()
+
+def refresh_data_in_background():
+    while not BG_STOP_EVENT.is_set():
+        BG_STOP_EVENT.wait(60)
+        refresh_data()
+
+BG_STOP_EVENT = Event()
+background_thread = Thread(target=refresh_data_in_background, daemon=True)
+background_thread.start()
 
 
 @route("/api/tags", method="GET")
 def get_tags():
+    db = Db(config)
     tags = db.get_all_tags()
     print(tags)
     return tags
@@ -46,6 +58,7 @@ def addTag():
     if request.json is None:
         abort(400, "Request didn't contain valid JSON")
     request_data: dict = cast(dict, request.json)
+    db = Db(config)
     db.create_tag(request_data["tag"])
     return db.get_all_tags()
 
@@ -59,6 +72,7 @@ def addSplit(identifier):
     print(request.json)
     timestamp = request_data["customStartTimestamp"]
     customStart = datetime.fromtimestamp(float(timestamp))
+    db = Db(config)
     db.add_splits(identifier, customStart)
 
     addWorkSessionSplits(WORK_SESSIONS, [(identifier, customStart)])
@@ -89,6 +103,7 @@ def work_sessions_customize(identifier):
     if request.json is None:
         abort(400, "Request didn't contain valid JSON")
     request_data: dict = cast(dict, request.json)
+    db = Db(config)
     db.add_override(identifier, request_data["title"], request_data["tag"])
 
     global WORK_SESSIONS_SUMMARY
@@ -135,14 +150,18 @@ def serve_static(path):
 
 @route("/api/refresh")
 def refresh_data():
-    global WORK_SESSIONS
-    global WORK_SESSIONS_SUMMARY
-    WORK_SESSIONS, WORK_SESSIONS_SUMMARY = loadData()
+    WORK_DATA_LOCK.acquire(blocking=True, timeout=1)
+    try:
+        global WORK_SESSIONS
+        global WORK_SESSIONS_SUMMARY
+        WORK_SESSIONS, WORK_SESSIONS_SUMMARY = loadData()
+    finally:
+        WORK_DATA_LOCK.release()
 
 
 @route("/api/exit")
 def exit():
-    Thread(target=shutdown_server).start()
+    Thread(target=shutdown_server, daemon=True).start()
     return ""
 
 
