@@ -4,7 +4,7 @@
 OutputDir := "E:\QuickBackups\daily-captures"
 PythonHelper := A_ScriptDir
 Wait_Seconds := 120
-DEBUG := false
+DEBUG := true
 
 ; Create the directory if it doesn't exist
 if not DirExist(OutputDir)
@@ -77,6 +77,8 @@ A_TrayMenu.Add()
 A_TrayMenu.Add("Force Track Activity", EnableForceTrackMode)
 A_TrayMenu.Add("Force Ignore Activity", EnableForceIgnoreMode)
 
+TraySetIcon(A_ScriptDir "\book_open.png")
+
 EnableForceTrackMode(ItemName, ItemPos, MyMenu) {
     global ForceTrackFlag
     ForceTrackFlag := !ForceTrackFlag
@@ -95,9 +97,11 @@ EnableForceIgnoreMode(ItemName, ItemPos, MyMenu) {
     if (ForceIgnoreFlag)
     {
         MyMenu.Check(ItemName)
+        TraySetIcon(A_ScriptDir "\book_x.png")
     }
     else {
         MyMenu.Uncheck(ItemName)
+        TraySetIcon(A_ScriptDir "\book_open.png")
     }
 }
 SetTimer(CaptureAndSaveScreenshot, Wait_Seconds*1000) ; in milliseconds
