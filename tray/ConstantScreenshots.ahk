@@ -4,7 +4,7 @@
 OutputDir := "E:\QuickBackups\daily-captures"
 PythonHelper := A_ScriptDir
 Wait_Seconds := 120
-DEBUG := true
+DEBUG := false
 
 ; Create the directory if it doesn't exist
 if not DirExist(OutputDir)
