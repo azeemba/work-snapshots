@@ -1,7 +1,27 @@
 
+from datetime import datetime
+import pathlib
+import subprocess
+
 import rumps
+import get_windows_mac
+import take_screenshot
 
 FREQUENCY_SECONDS = 120
+INTERESTING_NAMES = [
+    "Audacity",
+    "blender",
+    "Code",
+    "GitHubDesktop",
+    "inkscape",
+    "Resolve",
+    "unity",
+    "iTerm2"
+]
+DIRECTORY = pathlib.Path("/Users/Z/Sync/snapshots-secondary")
+
+def _get_formatted_time():
+    return datetime.now().strftime("%Y-%m-%d_%H_%M")
 
 class WorkSnapshot(rumps.App):
     _force_ignore: bool = False
@@ -24,10 +44,7 @@ class WorkSnapshot(rumps.App):
         else:
             self.icon = "book_x.png"
     
-    @rumps.clicked("Sync Now")
-    def syncToPrimaryServer(self, menuItem: rumps.MenuItem):
-        print("Not implemented syncing yet")
-    
+
     @rumps.timer(FREQUENCY_SECONDS)
     def checkAndCapture(self, sender):
         print("Check and capture")
@@ -40,10 +57,19 @@ class WorkSnapshot(rumps.App):
                 sound=False)
         
         # Now fetch windows
+        processes = get_windows_mac.get_windows_across_workspaces([])
 
         # Check if interesting or "force track"
+        if not get_windows_mac.check_if_interesting(processes, INTERESTING_NAMES):
+            return
 
-        # Snapshot + store
+        # Snapshot + sound
+        timestamp = _get_formatted_time()
+        take_screenshot.take_snapshot(DIRECTORY, timestamp)
+        subprocess.run(["afplay", "nice-camera-click-106269.mp3"])
+
+        # store
+        get_windows_mac.write_windows(DIRECTORY, timestamp, processes, FREQUENCY_SECONDS)
 
 if __name__ == "__main__":
     WorkSnapshot("Work Snapshot", icon="book_open.png").run()
