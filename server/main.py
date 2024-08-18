@@ -15,6 +15,7 @@ from datahandling import prep
 from db_handler import Db
 from fronto import makeSummaryForFrontend, makeDetailForFrontend, addWorkSessionSplits
 from images import ImageHandler
+import handle_secondary_source
 
 config = ConfigParser()
 config.read("config.conf")
@@ -152,6 +153,7 @@ def serve_static(path):
 def refresh_data():
     WORK_DATA_LOCK.acquire(blocking=True, timeout=1)
     try:
+        handle_secondary_source.handle(config)
         global WORK_SESSIONS
         global WORK_SESSIONS_SUMMARY
         WORK_SESSIONS, WORK_SESSIONS_SUMMARY = loadData()
