@@ -2,6 +2,7 @@
 from datetime import datetime
 import pathlib
 import subprocess
+import re
 
 import rumps
 import get_windows_mac
@@ -22,6 +23,17 @@ DIRECTORY = pathlib.Path("/Users/Z/Sync/snapshots-secondary")
 
 def _get_formatted_time():
     return datetime.now().strftime("%Y-%m-%d_%H_%M")
+
+def _is_user_idle():
+    output = subprocess.check_output(["ioreg", "-c", "IOHIDSystem"], text=True)
+    match: re.Match = re.search(r"\"HIDIdleTime\" = (?P<time>\d+)", output)
+    if not match:
+        print("Couldn't figure out idle time: ", output)
+        return True
+    
+    duration_seconds = int(match.group("time")) / 1e9
+    print("Idle duration detected: ", duration_seconds)
+    return duration_seconds >= FREQUENCY_SECONDS
 
 class WorkSnapshot(rumps.App):
     _force_ignore: bool = False
@@ -55,6 +67,10 @@ class WorkSnapshot(rumps.App):
                 "Currently, is in ignore mode.",
                 "Make sure you aren't doing work lol.",
                 sound=False)
+        
+        # Idle check
+        if _is_user_idle():
+            return
         
         # Now fetch windows
         processes = get_windows_mac.get_windows_across_workspaces([])
