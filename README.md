@@ -1,12 +1,11 @@
 Work Snapshots
 ==============
 
-If [Windows Recall](https://www.theverge.com/2024/6/13/24178144/microsoft-windows-ai-recall-feature-delay)
-was not secure enough for you, here is the same feature set implemented by a
-random guy who you should trust even less.
+Take screenshots only when specific applications are running and group
+screenshots into work sessions.
 
-I built this so I could have a fun record of my progress through my side projects.
-Though, it has also turned out to be useful in tracking the time I spend on different projects.
+Add tags to sessions to track time spent on projects or to look through progress.
+
 
 ### Features
 - Take screenshots evey few mins if any "interesting" application is running
@@ -40,7 +39,7 @@ when those applications are open by clicking "Force Ignore Activity"
 
 ### Problems
 - Set up is manual (need to create two python virtual environments and a node environment)
-- Windows only
+- Windows setup is easier - mac setup is more convoluted
 - Screenshots and process data is stored in plaintext! You have to make sure sensitive
 things aren't getting recorded.
 
@@ -79,6 +78,24 @@ Then you can run the AutoHotKey script which will start monitoring your windows.
 If you have AutoHotKey installed, you should just be able to click on
 ConstantScreenshots.ahk script to launch it.
 
+## Tray-mac
+
+tray-mac directory has a mac utility to run the same logic on macs but instead
+of writing to sqlite, it writes JSON files. The intention is for the
+`server` to be configured to detect these JSON files as "secondary" data.
+
+This is obviously convoluted but I use it to share my work snapshots from my mac to my desktop.
+
+To build the mac application run:
+
+```
+python -m venv .venv
+.venv/bin/python -m pip install -r requirements.txt
+.venv/bin/python setup.py py2app -A
+```
+
+Note the created application needs "screen recording" priviliges so that it is given access to the
+window titles.
 
 ## Server
 
@@ -124,14 +141,6 @@ npm run build
 
 
 ## FAQs
-
-### Why windows only?
-
-It's hard to write generic logic to pull information on what UI applications the user is
-running.
-
-`server/` and `ui/` are fully generic. You would only have to replace the `tray/` part
-if you wanted to make it work on another platform.
 
 ### Can I request a feature? Can I send you a PR?
 
