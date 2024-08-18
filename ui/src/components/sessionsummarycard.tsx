@@ -105,7 +105,7 @@ function SessionSummaryCard({
           }
           ref={ref}
         >
-          <div className="w-full aspect-video">
+          <div className="w-full aspect-video overflow-hidden">
             {inView ? (
               <img
                 className="w-full"
