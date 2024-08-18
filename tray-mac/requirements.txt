@@ -1,0 +1,3 @@
+rumps
+pillow
+py2app
