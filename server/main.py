@@ -36,10 +36,12 @@ def loadData():
 WORK_DATA_LOCK = Lock()
 WORK_SESSIONS, WORK_SESSIONS_SUMMARY = loadData()
 
+
 def refresh_data_in_background():
     while not BG_STOP_EVENT.is_set():
         BG_STOP_EVENT.wait(60)
         refresh_data()
+
 
 BG_STOP_EVENT = Event()
 background_thread = Thread(target=refresh_data_in_background, daemon=True)

@@ -16,6 +16,7 @@ class Process:
     title: str
     isActive: bool
 
+
 @dataclass
 class SnapshotSingle:
     timestamp: datetime
@@ -101,7 +102,9 @@ def readData(db: Db, config=None) -> Snapshots:
             row["IsActive"] == 1,
         )
         if dt not in byTime:
-            byTime[dt] = SnapshotSingle(dt, [], row["Datetime"], row["RecordFreqSeconds"]) # TODO
+            byTime[dt] = SnapshotSingle(
+                dt, [], row["Datetime"], row["RecordFreqSeconds"]
+            )  # TODO
         byTime[dt].processes.append(p)
 
     print(f"Took {(time.monotonic_ns() - start)/1e9} seconds to read all data")
@@ -135,7 +138,11 @@ def groupIntoSessions(groupedByTime: Snapshots, config=None) -> WorkSessionsDict
             datetime2key(start_timestamp),
             start_timestamp,
             last_timestamp,
-            timedelta(seconds=sum(x.record_frequency_seconds for x in current_session.values())),
+            timedelta(
+                seconds=sum(
+                    x.record_frequency_seconds for x in current_session.values()
+                )
+            ),
             title,
             WorkSession.pickImageTimestamp(current_session, title),
             current_session,

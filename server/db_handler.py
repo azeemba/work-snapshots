@@ -21,11 +21,21 @@ class Db:
         self.connection.close()
 
     def get_all_processes(self):
-        res = self.connection.execute("SELECT datetime, process, title, isActive, recordFrequencySeconds FROM snapshot_processes ORDER BY datetime")
+        res = self.connection.execute(
+            "SELECT datetime, process, title, isActive, recordFrequencySeconds FROM snapshot_processes ORDER BY datetime"
+        )
         rows = []
         for row in res:
             # Keys match what the code was using in CSV
-            rows.append({"Datetime": row[0], "Process": row[1], "Title": row[2], "IsActive": row[3], "RecordFreqSeconds": row[4]})
+            rows.append(
+                {
+                    "Datetime": row[0],
+                    "Process": row[1],
+                    "Title": row[2],
+                    "IsActive": row[3],
+                    "RecordFreqSeconds": row[4],
+                }
+            )
         return rows
 
     def get_all_overrides(self):
@@ -91,14 +101,24 @@ class Db:
         )
         print(f"Updated {res.rowcount} in add_splits")
 
-
     def add_processes(self, processes, frequencySeconds, timestamp, source="secondary"):
         db_data: list = []
         for p in processes:
-            db_data.append((timestamp, p["name"], p["title"], p["isActive"], frequencySeconds, source))
+            db_data.append(
+                (
+                    timestamp,
+                    p["name"],
+                    p["title"],
+                    p["isActive"],
+                    frequencySeconds,
+                    source,
+                )
+            )
         self.connection.executemany(
             """INSERT INTO snapshot_processes
                 (datetime, process, title, isActive, recordFrequencySeconds, source)
                 VALUES(?, ?, ?, ?, ?, ?)
-            """, db_data)
+            """,
+            db_data,
+        )
         self.connection.commit()

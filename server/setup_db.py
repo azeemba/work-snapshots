@@ -13,7 +13,7 @@ schema = {
     3: "CREATE TABLE IF NOT EXISTS tags(" "tag TEXT, color TEXT, icon TEXT)",
     4: "CREATE TABLE IF NOT EXISTS splits(originalKey INTEGER, customStartDatetime TEXT)",
     5: "CREATE TABLE IF NOT EXISTS snapshot_processes(datetime TEXT, process TEXT, title TEXT, isActive INTEGER, recordFrequencySeconds INTEGER)",
-    6: "ALTER TABLE snapshot_processes ADD COLUMN source TEXT DEFAULT \"primary\""
+    6: 'ALTER TABLE snapshot_processes ADD COLUMN source TEXT DEFAULT "primary"',
 }
 
 

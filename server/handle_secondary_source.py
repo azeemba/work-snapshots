@@ -16,8 +16,11 @@ import json
 
 from db_handler import Db
 
+
 def should_handle_secondary(config: ConfigParser):
-    return config.has_section("secondary_data") and config["secondary_data"].get("location")
+    return config.has_section("secondary_data") and config["secondary_data"].get(
+        "location"
+    )
 
 
 def _find_available_snapshots(config: ConfigParser):
@@ -39,20 +42,26 @@ def _find_available_snapshots(config: ConfigParser):
         #     continue
 
         files_by_timestamps[name].add(file_path)
-    
+
     return files_by_timestamps
 
-def _move_all_to_primary(files_by_timestamps: dict[str, set[Path]], config: ConfigParser):
+
+def _move_all_to_primary(
+    files_by_timestamps: dict[str, set[Path]], config: ConfigParser
+):
     db = Db(config)
     for timestamp, files in files_by_timestamps.items():
         print("Will work on: ", timestamp, files)
         _move_single_to_primary(timestamp, files, db, config)
 
-def _move_single_to_primary(timestamp: str, file_paths: set[Path], db: Db, config: ConfigParser):
+
+def _move_single_to_primary(
+    timestamp: str, file_paths: set[Path], db: Db, config: ConfigParser
+):
     if len(file_paths) != 2:
         print("I expect json and image file but got ", file_paths)
         return
-    
+
     json_file = None
     img_file = None
     for f in file_paths:
@@ -60,7 +69,7 @@ def _move_single_to_primary(timestamp: str, file_paths: set[Path], db: Db, confi
             json_file = f
         elif f.suffix.lower() == ".webp":
             img_file = f
-    
+
     if json_file is None or img_file is None:
         return
 
@@ -77,6 +86,7 @@ def _move_single_to_primary(timestamp: str, file_paths: set[Path], db: Db, confi
         json_file.unlink(missing_ok=True)
     except Exception as e:
         print("Failed to process secondary data", e, json_file)
+
 
 def _write_process_data(timestamp: str, file_path: Path, db: Db):
     data = json.loads(file_path.read_text())
@@ -96,6 +106,7 @@ def handle(config: ConfigParser):
     if should_handle_secondary(config):
         data = _find_available_snapshots(config)
         _move_all_to_primary(data, config)
+
 
 if __name__ == "__main__":
     config = ConfigParser()

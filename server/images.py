@@ -16,9 +16,7 @@ class ImageHandler:
         cache_dir.mkdir(exist_ok=True)
 
         self.thumbnail_size = config.getint("ui", "thumbnail_size")
-        self.cached_images = set(
-            str(s.name) for s in cache_dir.glob("*.webp")
-        )
+        self.cached_images = set(str(s.name) for s in cache_dir.glob("*.webp"))
 
     def prepare_thumbnails(self, workSessions: WorkSessionsDict):
         start = time.monotonic_ns()
