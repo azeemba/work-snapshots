@@ -4,7 +4,13 @@ from datetime import timedelta, datetime
 from typing import TypedDict
 from multiprocessing.spawn import old_main_modules
 
-from datahandling import Snapshots, WorkSessionsDict, WorkSession, datetime2key
+from datahandling import (
+    Snapshots,
+    WorkSessionsDict,
+    WorkSession,
+    datetime2key,
+    calculateWorkSessionDuration,
+)
 from db_handler import SessionOverride
 
 LightSession = TypedDict(
@@ -46,7 +52,7 @@ def addWorkSessionSplits(
             originalKey,
             currentSession.start,
             max(older_snapshots.keys()),
-            timedelta(minutes=len(older_snapshots) * 5),
+            calculateWorkSessionDuration(older_snapshots),
             updated_title,
             WorkSession.pickImageTimestamp(older_snapshots, updated_title),
             older_snapshots,
@@ -61,7 +67,7 @@ def addWorkSessionSplits(
             key,
             startDatetime,
             endDatetime,
-            timedelta(minutes=len(newer_snapshots) * 5),
+            calculateWorkSessionDuration(newer_snapshots),
             newer_title,
             WorkSession.pickImageTimestamp(newer_snapshots, newer_title),
             newer_snapshots,

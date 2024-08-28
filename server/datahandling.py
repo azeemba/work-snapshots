@@ -115,6 +115,12 @@ def datetime2key(input: datetime):
     return int(input.timestamp() / 100)
 
 
+def calculateWorkSessionDuration(snapshots: Snapshots):
+    return timedelta(
+        seconds=sum(x.record_frequency_seconds for x in snapshots.values())
+    )
+
+
 def groupIntoSessions(groupedByTime: Snapshots, config=None) -> WorkSessionsDict:
     start = time.monotonic_ns()
     timeout_minutes = 60
@@ -138,11 +144,7 @@ def groupIntoSessions(groupedByTime: Snapshots, config=None) -> WorkSessionsDict
             datetime2key(start_timestamp),
             start_timestamp,
             last_timestamp,
-            timedelta(
-                seconds=sum(
-                    x.record_frequency_seconds for x in current_session.values()
-                )
-            ),
+            calculateWorkSessionDuration(current_session),
             title,
             WorkSession.pickImageTimestamp(current_session, title),
             current_session,
