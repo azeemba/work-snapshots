@@ -67,6 +67,7 @@ class WorkSnapshot(rumps.App):
                 "Currently, is in ignore mode.",
                 "Make sure you aren't doing work lol.",
                 sound=False)
+            return
         
         # Idle check
         if _is_user_idle():
