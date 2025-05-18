@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Outlet, useLocation, Link } from "react-router-dom";
 import "tailwindcss/tailwind.css";
 import { Session } from "./components/sessionsummarycard";
-import { TagObject } from "./components/tagbadge";
+import { TagObject } from "./util/taghelpers";
 
 export type OutletContextInfo = {
   allSessions: Array<Session>;

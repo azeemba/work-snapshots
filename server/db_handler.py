@@ -11,6 +11,13 @@ class SessionOverride:
     custom_title: str | None
     tag: str | None
 
+@dataclass
+class TagMapping:
+    tag: str
+    color: str
+    parent: str
+    icon: str
+
 
 class Db:
     def __init__(self, config: ConfigParser):
@@ -75,12 +82,9 @@ class Db:
         row = res.fetchone()
         return SessionOverride(row[0], row[1], row[2])
 
-    def get_all_tags(self):
-        res = self.connection.execute("SELECT tag, color, icon FROM tags")
-        tagList = [
-            {"tag": row[0], "color": row[1], "icon": row[2]} for row in res.fetchall()
-        ]
-        return {"tags": tagList}
+    def get_all_tags(self) -> dict[str, TagMapping]:
+        res = self.connection.execute("SELECT tag, parent, color, icon FROM tags")
+        return {row[0]: TagMapping(tag=row[0], parent=row[1], color=row[2], icon=row[3]) for row in res.fetchall()}
 
     def create_tag(self, tag):
         res = self.connection.execute(
@@ -122,3 +126,34 @@ class Db:
             db_data,
         )
         self.connection.commit()
+    
+    def add_tag_parent(self, tag, parent):
+        """
+        Table tags has columns tag, color, parent.
+        This function will set the tag's parent to the parent value ONLY if the parent exists. It will
+        also update the color to be the parent's color.
+        """
+        # Check if parent exists
+        cur = self.connection.execute(
+            "SELECT color FROM tags WHERE tag = ?", (parent,)
+        )
+        parent_row = cur.fetchone()
+        if not parent_row:
+            print(f"Parent tag '{parent}' does not exist. No update performed.")
+            return
+
+        parent_color = parent_row[0]
+        self.connection.execute(
+            "UPDATE tags SET parent = ?, color = ? WHERE tag = ?",
+            (parent, parent_color, tag)
+        )
+        self.connection.commit()
+    
+    def remove_tag_parent(self, tag):
+        self.connection.execute(
+            "UPDATE tags SET parent = NULL WHERE tag = ?",
+            (tag,)
+        )
+        self.connection.commit()
+    
+

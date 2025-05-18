@@ -1,10 +1,9 @@
 import { Badge } from "flowbite-react";
 import { MouseEventHandler } from "react";
 import { IoMdCloseCircle } from "react-icons/io";
+import { calculateTagParentMap, TagObject } from "../util/taghelpers";
 
-export type TagObject = {
-  tag: string;
-};
+
 
 export default function TagBadge({
   availableTags,
@@ -31,11 +30,13 @@ export default function TagBadge({
     "bg-rose-900 text-rose-100",
     "bg-purple-900 text-purple-100",
   ];
-  availableTags.forEach((element, i) => {
+  availableTags.filter(x => !x.parent).forEach((element, i) => {
     if (element.tag !== "") {
       tagColors[element.tag] = availableColors[i % availableColors.length];
     }
   });
+
+  const tagParentMap = calculateTagParentMap(availableTags);
 
   const clickHandler: MouseEventHandler = (e) => {
     if (onClick) onClick(e);
@@ -44,7 +45,7 @@ export default function TagBadge({
   return (
     <Badge
       className={
-        tagColors[tag] +
+        tagColors[tagParentMap[tag]] +
         " border-2 border-transparent hover:border-slate-500 cursor-pointer"
       }
       size="sm"

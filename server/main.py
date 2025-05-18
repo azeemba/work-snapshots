@@ -13,7 +13,7 @@ from configparser import ConfigParser
 
 from datahandling import prep
 from db_handler import Db
-from fronto import makeSummaryForFrontend, makeDetailForFrontend, addWorkSessionSplits
+from fronto import makeSummaryForFrontend, makeDetailForFrontend, addWorkSessionSplits, convertTagsToResponse
 from images import ImageHandler
 import handle_secondary_source
 
@@ -28,7 +28,7 @@ def loadData():
     db = Db(config)
     sessions = prep(db)
     addWorkSessionSplits(sessions, db.get_all_splits())
-    summary = makeSummaryForFrontend(sessions, db.get_all_overrides())
+    summary = makeSummaryForFrontend(sessions, db.get_all_overrides(), db.get_all_tags())
     imageHandler.prepare_thumbnails(sessions)
     return sessions, summary
 
@@ -53,8 +53,7 @@ def get_tags():
     db = Db(config)
     tags = db.get_all_tags()
     print(tags)
-    return tags
-
+    return convertTagsToResponse(tags)
 
 @route("/api/tags/", method="PUT")
 def addTag():
@@ -63,7 +62,21 @@ def addTag():
     request_data: dict = cast(dict, request.json)
     db = Db(config)
     db.create_tag(request_data["tag"])
-    return db.get_all_tags()
+    return convertTagsToResponse(db.get_all_tags())
+
+@route("/api/tags", method="POST")
+def updateTag():
+    if request.json is None:
+        abort(400, "Request didn't contain valid JSON")
+    request_data: dict = cast(dict, request.json)
+    db = Db(config)
+    parent = request_data["parent"]
+    tag = request_data["tag"]
+    if parent:
+        db.add_tag_parent(tag, parent)
+    else:
+        db.remove_tag_parent(tag)
+    return convertTagsToResponse(db.get_all_tags())
 
 
 @route("/api/worksessions/<identifier:int>/split", method="POST")
@@ -81,7 +94,7 @@ def addSplit(identifier):
     addWorkSessionSplits(WORK_SESSIONS, [(identifier, customStart)])
     global WORK_SESSIONS_SUMMARY
     WORK_SESSIONS_SUMMARY = makeSummaryForFrontend(
-        WORK_SESSIONS, db.get_all_overrides()
+        WORK_SESSIONS, db.get_all_overrides(), db.get_all_tags()
     )
     imageHandler.prepare_thumbnails(WORK_SESSIONS)
     return json.dumps(WORK_SESSIONS_SUMMARY)
@@ -111,7 +124,7 @@ def work_sessions_customize(identifier):
 
     global WORK_SESSIONS_SUMMARY
     WORK_SESSIONS_SUMMARY = makeSummaryForFrontend(
-        WORK_SESSIONS, db.get_all_overrides()
+        WORK_SESSIONS, db.get_all_overrides(), db.get_all_tags()
     )
     return json.dumps(WORK_SESSIONS_SUMMARY)
 
@@ -135,7 +148,7 @@ def error404(err):
 
 @route("/image/<timestamp>")
 def serve_images(timestamp):
-    if request.query.thumbnail:
+    if request.query.thumbnail: # type: ignore
         imageHandler.makeSureThumbnailExists(timestamp)
         return static_file(timestamp, root=config["main"]["cache"])
     return static_file(timestamp, root=config["main"]["images"])

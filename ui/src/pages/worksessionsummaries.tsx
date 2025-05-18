@@ -6,6 +6,7 @@ import { useOutletContext } from "react-router-dom";
 import SessionSummaryCard from "../components/sessionsummarycard";
 import TagBadge from "../components/tagbadge";
 import { OutletContextInfo } from "../App";
+import { calculateTagParentMap } from "../util/taghelpers";
 
 export default function WorkSessionsSummaries() {
   const { allSessions, setAllSessions, availableTags, setAvailableTags } =
@@ -14,6 +15,8 @@ export default function WorkSessionsSummaries() {
 
   const [shouldShowAddTags, setShowAddTags] = useState(false);
   const [newTagValue, setNewTagValue] = useState("");
+
+  const tagParentMap = calculateTagParentMap(availableTags);
 
   const handleEdit = ({
     id,
@@ -93,7 +96,8 @@ export default function WorkSessionsSummaries() {
           )}
           <div className="flex flex-row flex-wrap gap-2">
             {availableTags
-              .filter((t) => selectedTag === undefined || t.tag === selectedTag)
+              .filter((t) => selectedTag === undefined || tagParentMap[t.tag] === selectedTag)
+              .filter(t => !t.parent)
               .map((t) => {
                 return (
                   <TagBadge
@@ -110,7 +114,7 @@ export default function WorkSessionsSummaries() {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {allSessions
-          .filter((s) => selectedTag === undefined || s.tag === selectedTag)
+          .filter((s) => selectedTag === undefined || tagParentMap[s.tag] === selectedTag)
           .map((session, i) => (
             <SessionSummaryCard
               key={i}

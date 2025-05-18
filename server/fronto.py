@@ -11,7 +11,7 @@ from datahandling import (
     datetime2key,
     calculateWorkSessionDuration,
 )
-from db_handler import SessionOverride
+from db_handler import SessionOverride, TagMapping
 
 LightSession = TypedDict(
     "LightSession",
@@ -75,7 +75,7 @@ def addWorkSessionSplits(
 
 
 def makeSummaryForFrontend(
-    workSessions: WorkSessionsDict, overrides: dict[int, SessionOverride]
+    workSessions: WorkSessionsDict, overrides: dict[int, SessionOverride], tag_mappings: dict[str, TagMapping]
 ):
     lightSessions: list[LightSession] = []
 
@@ -130,3 +130,7 @@ def makeDetailForFrontend(workSession: WorkSession, lightSession):
             "processes": current,
         }
     return {"details": detailed_snapshots, "session": lightSession}
+
+def convertTagsToResponse(tags: dict[str, TagMapping]) -> dict[str, list[dict[str, str]]]:
+    tags_serialized= [t.__dict__ for t in tags.values()]
+    return {"tags" : tags_serialized}

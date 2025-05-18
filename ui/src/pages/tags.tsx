@@ -4,18 +4,32 @@ import { OutletContextInfo } from "../App";
 import { displayMinutes } from "../util/time";
 import TagBadge from "../components/tagbadge";
 import UsageHeatmap, { HeatmapAllData } from "../components/usageheatmap";
+import { calculateTagParentMap } from "../util/taghelpers";
 
 export default function TagsPage() {
   // Figure out how to get the data
-  const { allSessions, availableTags } = useOutletContext<OutletContextInfo>();
+  const { allSessions, availableTags, setAvailableTags } = useOutletContext<OutletContextInfo>();
   const [chosenTag, setChosenTag] = useState<string | undefined>(undefined);
+  const [addParentFor, setAddChildFor] = useState<string | null>(null);
+  const [selectedChild, setSelectedChild] = useState<string | null>(null);
+
+  const tagParentMap: { [key: string]: string } = calculateTagParentMap(availableTags);
+
   const aggregateDurationByTags = () => {
     const durations: { [key: string]: number } = {};
     for (const session of allSessions) {
       if (session.tag in durations) {
-        durations[session.tag] += session.duration_minutes;
+        durations[tagParentMap[session.tag]] += session.duration_minutes;
       } else {
-        durations[session.tag] = session.duration_minutes;
+        durations[tagParentMap[session.tag]] = session.duration_minutes;
+      }
+    }
+    // Add tags taht don't have a parent and have 0 data
+    // so they can get more children
+    for (const tag of availableTags) {
+      if (!(tag.parent || tag.tag in durations))
+      {
+        durations[tag.tag] = 0
       }
     }
     return durations;
@@ -42,6 +56,12 @@ export default function TagsPage() {
     if (chosenTag == key) {
       classes += " bg-slate-700";
     }
+    const children = availableTags.filter(x => x.parent == key).map(x => <TagBadge tag={x.tag} availableTags={availableTags}></TagBadge>);
+
+    // "+" button and parent selection UI
+    const showAddChild = addParentFor === key;
+    const otherTags = availableTags.filter(t => t.tag !== key);
+
     durationrows.push(
       <div key={key} className={classes}>
         <TagBadge
@@ -50,6 +70,57 @@ export default function TagsPage() {
           onClick={() => toggleTag(key)}
           showClose={chosenTag == key}
         />
+        <button
+          className="ml-2 px-2 py-1 rounded bg-blue-600 text-white"
+          onClick={() => {
+            setAddChildFor(key);
+            setSelectedChild(null);
+          }}
+          title="Add parent tag"
+        >+</button>
+        {showAddChild && (
+          <span className="flex flex-row items-center gap-2 ml-2">
+            <select
+              value={selectedChild ?? ""}
+              onChange={e => setSelectedChild(e.target.value)}
+              className="border rounded px-1 py-0.5 text-black"
+            >
+              {otherTags.filter(t => t.parent != key).filter(t => t.tag).map(t =>
+                <option key={t.tag} value={t.tag} selected={selectedChild == t.tag}>{t.tag}</option>
+              )}
+            </select>
+            <button
+              className="px-2 py-1 rounded bg-green-600 text-white"
+              disabled={!selectedChild}
+              onClick={async () => {
+                if (!selectedChild) return;
+                // Send request to add parent/child relationship
+                console.log(JSON.stringify({ parent: key, tag: selectedChild }))
+                const response = await fetch("/api/tags", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ parent: key, tag: selectedChild }),
+                });
+                setAddChildFor(null);
+                setSelectedChild(null);
+                // Optionally: refresh tags from server here
+                const tags = (await response.json()).tags;
+                tags.push({"tag": ""})
+                setAvailableTags(tags);
+              }}
+              title="Confirm"
+            >✔</button>
+            <button
+              className="px-2 py-1 rounded bg-gray-400 text-white"
+              onClick={() => {
+                setAddChildFor(null);
+                setSelectedChild(null);
+              }}
+              title="Cancel"
+            >✕</button>
+          </span>
+        )}
+        {children}
         <div>{displayMinutes(duration)}</div>
       </div>,
     );
@@ -68,7 +139,7 @@ export default function TagsPage() {
     for (let i = 0; i < 7; ++i) dayWeekCount.push({});
 
     for (const session of allSessions) {
-      const dontCount = chosenTag !== undefined && session.tag != chosenTag;
+      const dontCount = chosenTag !== undefined && tagParentMap[session.tag] != chosenTag;
       const start = new Date(session.start * 1000);
       const dayIndex = start.getDay();
       const week = getSundayForThatWeek(start);
@@ -90,7 +161,7 @@ export default function TagsPage() {
       }
     }
     return dayWeekCount;
-  }, [allSessions, chosenTag]);
+  }, [allSessions, chosenTag, tagParentMap]);
 
   // What we want to show?
 

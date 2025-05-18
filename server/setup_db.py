@@ -14,6 +14,7 @@ schema = {
     4: "CREATE TABLE IF NOT EXISTS splits(originalKey INTEGER, customStartDatetime TEXT)",
     5: "CREATE TABLE IF NOT EXISTS snapshot_processes(datetime TEXT, process TEXT, title TEXT, isActive INTEGER, recordFrequencySeconds INTEGER)",
     6: 'ALTER TABLE snapshot_processes ADD COLUMN source TEXT DEFAULT "primary"',
+    7: 'ALTER TABLE tags ADD COLUMN parent TEXT',
 }
 
 
