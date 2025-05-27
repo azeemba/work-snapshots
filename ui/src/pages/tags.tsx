@@ -18,10 +18,11 @@ export default function TagsPage() {
   const aggregateDurationByTags = () => {
     const durations: { [key: string]: number } = {};
     for (const session of allSessions) {
-      if (session.tag in durations) {
-        durations[tagParentMap[session.tag]] += session.duration_minutes;
+      const key = tagParentMap[session.tag];
+      if (key in durations) {
+        durations[key] += session.duration_minutes;
       } else {
-        durations[tagParentMap[session.tag]] = session.duration_minutes;
+        durations[key] = session.duration_minutes;
       }
     }
     // Add tags taht don't have a parent and have 0 data
