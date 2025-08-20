@@ -8,7 +8,7 @@ from threading import Thread, Lock, Event
 
 from typing import cast
 
-from bottle import static_file, route, request, abort, error
+from bottle import static_file, route, request, abort, error, response
 from configparser import ConfigParser
 
 from datahandling import prep
@@ -148,6 +148,7 @@ def error404(err):
 
 @route("/image/<timestamp>")
 def serve_images(timestamp):
+    response.headers['Cache-Control'] = 'max-age=3600'
     if request.query.thumbnail: # type: ignore
         imageHandler.makeSureThumbnailExists(timestamp)
         return static_file(timestamp, root=config["main"]["cache"])
@@ -156,6 +157,7 @@ def serve_images(timestamp):
 
 @route("/cache/<file>")
 def serve_cached(file):
+    response.headers['Cache-Control'] = 'max-age=3600'
     return static_file(file, config["main"]["cache"])
 
 

@@ -1,4 +1,5 @@
 import time
+import threading
 from PIL import Image
 from pathlib import Path
 
@@ -17,6 +18,11 @@ class ImageHandler:
 
         self.thumbnail_size = config.getint("ui", "thumbnail_size")
         self.cached_images = set(str(s.name) for s in cache_dir.glob("*.webp"))
+        
+        # Thread safety locks
+        self.cached_images_lock = threading.RLock()  # Protects cached_images set
+        self.image_locks = {}  # Per-image locks for thumbnail generation
+        self.image_locks_lock = threading.Lock()  # Protects image_locks dict
 
     def prepare_thumbnails(self, workSessions: WorkSessionsDict):
         start = time.monotonic_ns()
@@ -34,17 +40,44 @@ class ImageHandler:
     def makeSureThumbnailExists(self, image):
         self._prepare_single_thumbnail(self.thumbnail_size, image)
 
+    def _get_image_lock(self, imageName):
+        """Get or create a lock for a specific image name"""
+        with self.image_locks_lock:
+            if imageName not in self.image_locks:
+                self.image_locks[imageName] = threading.Lock()
+            return self.image_locks[imageName]
+
     def _prepare_single_thumbnail(self, size, imageName):
-        if imageName in self.cached_images:
-            return
+        # Quick check without lock first (optimization)
+        with self.cached_images_lock:
+            if imageName in self.cached_images:
+                return
 
-        original_path = Path(self.image_path, imageName)
-        if not original_path.exists():
-            return
+        # Get per-image lock to prevent multiple threads processing same image
+        image_lock = self._get_image_lock(imageName)
+        
+        with image_lock:
+            # Double-check inside lock (another thread might have created it)
+            with self.cached_images_lock:
+                if imageName in self.cached_images:
+                    return
 
-        target_path = Path(self.cache_path, imageName)
+            original_path = Path(self.image_path, imageName)
+            if not original_path.exists():
+                return
 
-        with Image.open(original_path) as original:
-            original.thumbnail((size, size))
-            original.save(target_path)
-        self.cached_images.add(imageName)
+            target_path = Path(self.cache_path, imageName)
+
+            # Only create thumbnail if target doesn't exist (filesystem safety)
+            if not target_path.exists():
+                try:
+                    with Image.open(original_path) as original:
+                        original.thumbnail((size, size))
+                        original.save(target_path)
+                except Exception as e:
+                    print(f"Failed to create thumbnail for {imageName}: {e}")
+                    return
+            
+            # Add to cached set only after successful creation
+            with self.cached_images_lock:
+                self.cached_images.add(imageName)
