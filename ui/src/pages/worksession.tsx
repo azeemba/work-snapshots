@@ -1,4 +1,4 @@
-import { KeyboardEvent, useState, useEffect } from "react";
+import { KeyboardEvent, useState } from "react";
 import { useLoaderData, useParams } from "react-router-dom";
 import SingleSnapshotCard, {
   ModalPreviewArgs,
@@ -27,11 +27,6 @@ function WorkSession() {
   const { session, details } = useLoaderData() as LoadedData;
   const timestamps = Object.keys(details) as unknown as Array<number>;
   const { sessionId } = useParams();
-
-  // Scroll to top when entering details page
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
 
   function handleTriggerModalPreview({
     snapshotId,

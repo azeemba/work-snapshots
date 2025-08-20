@@ -1,7 +1,7 @@
 import "./App.css";
 import { Button, Tooltip } from "flowbite-react";
 import { useEffect, useState } from "react";
-import { Outlet, useLocation, Link, ScrollRestoration } from "react-router-dom";
+import { Outlet, useLocation, Link, useNavigate, ScrollRestoration } from "react-router-dom";
 import "tailwindcss/tailwind.css";
 import { Session } from "./components/sessionsummarycard";
 import { TagObject } from "./util/taghelpers";
@@ -14,6 +14,7 @@ export type OutletContextInfo = {
 };
 function App() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [allSessions, setAllSessions] = useState<Array<Session>>([]);
   const [availableTags, setAvailableTags] = useState<Array<TagObject>>([]);
   const [loading, setLoading] = useState(true);
@@ -65,11 +66,12 @@ function App() {
         </div>
         <div className="flex flex-row space-x-5">
           {location.pathname !== "/" ? (
-            <Link to="/">
-              <Button className="bg-indigo-500 text-indigo-50 hover:bg-indigo-600 transition-colors">
-                Back
-              </Button>
-            </Link>
+            <Button 
+              className="bg-indigo-500 text-indigo-50 hover:bg-indigo-600 transition-colors"
+              onClick={() => navigate(-1)}
+            >
+              Back
+            </Button>
           ) : (
             <Link to="/stats">
               <Button className="bg-indigo-500 text-indigo-50 hover:bg-indigo-600 transition-colors">
