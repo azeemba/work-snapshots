@@ -47,7 +47,6 @@ function SessionSummaryCard({
         id={`tag-select-${session.id}`}
         className="bg-gray-50 border border-gray-300 text-gray-900 text-xs rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full p-2"
         value={editedTag}
-        onClick={(e) => e.preventDefault()}
         onChange={(e) => setEditedTag(e.target.value)}
       >
         <option key="empty" value="">
@@ -102,15 +101,15 @@ function SessionSummaryCard({
     setEditMode(false);
   };
 
-  return (
-    <Link to={link}>
-        <div
-          className={
-            backgroundColor +
-            " cursor-pointer border-4 border-transparent shadow-lg rounded-md overflow-hidden transition-all duration-300 ease-in-out hover:border-indigo-500"
-          }
-          ref={ref}
-        >
+  const cardContent = (
+    <div
+      className={
+        backgroundColor +
+        (inEditMode ? "" : " cursor-pointer") +
+        " border-4 border-transparent shadow-lg rounded-md overflow-hidden transition-all duration-300 ease-in-out hover:border-indigo-500"
+      }
+      ref={ref}
+    >
           <div className="w-full aspect-video overflow-hidden">
             {inView ? (
               <img
@@ -124,7 +123,6 @@ function SessionSummaryCard({
             <div className="h-14 overflow-hidden">
               {inEditMode ? (
                 <TextInput
-                  onClick={(e) => e.preventDefault()}
                   value={editedTitle}
                   onInput={(e: FormEvent<HTMLInputElement>) =>
                     setEditedTitle((e.target as HTMLInputElement).value)
@@ -174,8 +172,9 @@ function SessionSummaryCard({
             </div>
           </div>
         </div>
-    </Link>
   );
+
+  return inEditMode ? cardContent : <Link to={link}>{cardContent}</Link>;
 }
 
 export default SessionSummaryCard;
