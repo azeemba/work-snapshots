@@ -1,7 +1,7 @@
 import "./App.css";
 import { Button, Tooltip } from "flowbite-react";
 import { useEffect, useState } from "react";
-import { Outlet, useLocation, Link } from "react-router-dom";
+import { Outlet, useLocation, Link, ScrollRestoration } from "react-router-dom";
 import "tailwindcss/tailwind.css";
 import { Session } from "./components/sessionsummarycard";
 import { TagObject } from "./util/taghelpers";
@@ -16,23 +16,43 @@ function App() {
   const location = useLocation();
   const [allSessions, setAllSessions] = useState<Array<Session>>([]);
   const [availableTags, setAvailableTags] = useState<Array<TagObject>>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   function refreshClick() {
-    fetch("/api/refresh").then(() => {
-      window.location.reload();
-    });
-  }
-  useEffect(() => {
-    fetch("/api/worksessions")
-      .then((response) => response.json())
-      .then((data) => {
-        setAllSessions(data);
+    setLoading(true);
+    setError(null);
+    fetch("/api/refresh")
+      .then(() => {
+        window.location.reload();
+      })
+      .catch(() => {
+        setError("Failed to refresh data");
+        setLoading(false);
       });
-    fetch("/api/tags")
-      .then((response) => response.json())
-      .then((data) => {
-        const tags = data.tags;
+  }
+
+  useEffect(() => {
+    Promise.all([
+      fetch("/api/worksessions").then((response) => {
+        if (!response.ok) throw new Error('Failed to fetch sessions');
+        return response.json();
+      }),
+      fetch("/api/tags").then((response) => {
+        if (!response.ok) throw new Error('Failed to fetch tags');
+        return response.json();
+      })
+    ])
+      .then(([sessionsData, tagsData]) => {
+        setAllSessions(sessionsData);
+        const tags = tagsData.tags;
         tags.push({ tag: "" });
         setAvailableTags(tags);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message);
+        setLoading(false);
       });
   }, []);
 
@@ -61,20 +81,33 @@ function App() {
             <Button
               className="bg-indigo-500 text-indigo-50 hover:bg-indigo-600 transition-colors"
               onClick={refreshClick}
+              disabled={loading}
             >
-              Refresh
+              {loading ? 'Loading...' : 'Refresh'}
             </Button>
           </Tooltip>
         </div>
       </nav>
-      <Outlet
-        context={{
-          allSessions,
-          setAllSessions,
-          availableTags,
-          setAvailableTags,
-        }}
-      ></Outlet>
+      {error && (
+        <div className="bg-red-600 text-white p-4 text-center">
+          Error: {error}
+        </div>
+      )}
+      {loading ? (
+        <div className="flex justify-center items-center min-h-64">
+          <div className="text-white">Loading...</div>
+        </div>
+      ) : (
+        <Outlet
+          context={{
+            allSessions,
+            setAllSessions,
+            availableTags,
+            setAvailableTags,
+          }}
+        ></Outlet>
+      )}
+      <ScrollRestoration />
     </div>
   );
 }

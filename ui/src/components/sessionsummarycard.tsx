@@ -5,7 +5,8 @@ import { FaCheck, FaPencilAlt } from "react-icons/fa";
 import { FaXmark } from "react-icons/fa6";
 import { Link } from "react-router-dom";
 import { Button, TextInput } from "flowbite-react";
-import TagBadge, { TagObject } from "./tagbadge";
+import TagBadge from "./tagbadge";
+import { TagObject } from "../util/taghelpers";
 import { displayMinutes } from "../util/time";
 
 export type Session = {
@@ -43,7 +44,7 @@ function SessionSummaryCard({
   const tagDropdown = (
     <div className="flex flex-row h-8">
       <select
-        id="countries"
+        id={`tag-select-${session.id}`}
         className="bg-gray-50 border border-gray-300 text-gray-900 text-xs rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full p-2"
         value={editedTag}
         onClick={(e) => e.preventDefault()}
@@ -83,16 +84,21 @@ function SessionSummaryCard({
 
   const editButtonClicked = (ev: MouseEvent) => {
     ev.preventDefault();
+    // Reset edit state to current session values when entering edit mode
+    setEditedTitle(session.title);
+    setEditedTag(session.tag);
     setEditMode(true);
   };
   const saveButtonClicked = (ev: MouseEvent) => {
     ev.preventDefault();
-    console.log("Will add override", editedTitle, editedTag);
     setEditMode(false);
     onEdit({ id: session.id, title: editedTitle, tag: editedTag });
   };
   const noSaveClicked = (ev: MouseEvent) => {
     ev.preventDefault();
+    // Reset to original values when canceling
+    setEditedTitle(session.title);
+    setEditedTag(session.tag);
     setEditMode(false);
   };
 

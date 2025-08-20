@@ -1,4 +1,4 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useState, useMemo } from "react";
 import { FaPlus } from "react-icons/fa";
 import { Button, TextInput } from "flowbite-react";
 import { useOutletContext } from "react-router-dom";
@@ -16,7 +16,20 @@ export default function WorkSessionsSummaries() {
   const [shouldShowAddTags, setShowAddTags] = useState(false);
   const [newTagValue, setNewTagValue] = useState("");
 
-  const tagParentMap = calculateTagParentMap(availableTags);
+  // Memoize expensive calculations
+  const tagParentMap = useMemo(() => calculateTagParentMap(availableTags), [availableTags]);
+  
+  const filteredTags = useMemo(() => 
+    availableTags
+      .filter((t) => selectedTag === undefined || tagParentMap[t.tag] === selectedTag)
+      .filter(t => !t.parent),
+    [availableTags, selectedTag, tagParentMap]
+  );
+
+  const filteredSessions = useMemo(() =>
+    allSessions.filter((s) => selectedTag === undefined || tagParentMap[s.tag] === selectedTag),
+    [allSessions, selectedTag, tagParentMap]
+  );
 
   const handleEdit = ({
     id,
@@ -37,9 +50,16 @@ export default function WorkSessionsSummaries() {
         tag: tag,
       }),
     })
-      .then((resp) => resp.json())
+      .then((resp) => {
+        if (!resp.ok) throw new Error('Failed to update session');
+        return resp.json();
+      })
       .then((resp) => {
         setAllSessions(resp);
+      })
+      .catch((err) => {
+        console.error('Failed to update session:', err);
+        // Optionally show error to user
       });
   };
 
@@ -53,14 +73,20 @@ export default function WorkSessionsSummaries() {
         tag: newTagValue,
       }),
     })
-      .then((resp) => resp.json())
+      .then((resp) => {
+        if (!resp.ok) throw new Error('Failed to add tag');
+        return resp.json();
+      })
       .then((resp) => {
         const tags = resp.tags;
         tags.push({ tag: "" });
         setAvailableTags(tags);
-      })
-      .then(() => {
         setShowAddTags(false);
+        setNewTagValue("");
+      })
+      .catch((err) => {
+        console.error('Failed to add tag:', err);
+        // Optionally show error to user
       });
   };
 
@@ -95,10 +121,7 @@ export default function WorkSessionsSummaries() {
             </Button>
           )}
           <div className="flex flex-row flex-wrap gap-2">
-            {availableTags
-              .filter((t) => selectedTag === undefined || tagParentMap[t.tag] === selectedTag)
-              .filter(t => !t.parent)
-              .map((t) => {
+            {filteredTags.map((t) => {
                 return (
                   <TagBadge
                     key={t.tag}
@@ -113,11 +136,9 @@ export default function WorkSessionsSummaries() {
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {allSessions
-          .filter((s) => selectedTag === undefined || tagParentMap[s.tag] === selectedTag)
-          .map((session, i) => (
+        {filteredSessions.map((session) => (
             <SessionSummaryCard
-              key={i}
+              key={session.id}
               session={session}
               availableTags={availableTags}
               onEdit={handleEdit}

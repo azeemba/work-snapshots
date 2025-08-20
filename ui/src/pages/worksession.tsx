@@ -1,4 +1,4 @@
-import { KeyboardEvent, useState } from "react";
+import { KeyboardEvent, useState, useEffect } from "react";
 import { useLoaderData, useParams } from "react-router-dom";
 import SingleSnapshotCard, {
   ModalPreviewArgs,
@@ -28,6 +28,11 @@ function WorkSession() {
   const timestamps = Object.keys(details) as unknown as Array<number>;
   const { sessionId } = useParams();
 
+  // Scroll to top when entering details page
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   function handleTriggerModalPreview({
     snapshotId,
     targetUrl,
@@ -47,7 +52,6 @@ function WorkSession() {
         customStartTimestamp: snapshotId,
       }),
     });
-    console.log("Split added. Will refresh instead of being clever.");
     window.location.reload();
   }
   function makeNext(ts: number) {
