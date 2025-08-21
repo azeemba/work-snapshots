@@ -7,8 +7,9 @@ from threading import Thread, Lock, Event
 
 from typing import cast
 
-from flask import Flask, request, abort, jsonify, send_from_directory
+from flask import Flask, request, abort, jsonify, send_from_directory, g
 from configparser import ConfigParser
+import logging
 
 from datahandling import prep
 from db_handler import Db
@@ -21,7 +22,20 @@ config.read("config.conf")
 imageHandler = ImageHandler(config)
 frontend_dir = config["main"]["static"]
 
+
 app = Flask(__name__)
+logging.basicConfig(level=logging.INFO)
+
+@app.before_request
+def start_timer():
+    g.start_time = time.time()
+
+@app.after_request
+def log_request_time(response):
+    if hasattr(g, 'start_time'):
+        elapsed = time.time() - g.start_time
+        app.logger.info(f"{request.method} {request.path} took {elapsed:.4f} seconds")
+    return response
 
 
 def loadData():
