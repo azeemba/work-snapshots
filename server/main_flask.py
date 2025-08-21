@@ -155,6 +155,7 @@ def error404(err):
     if request.path.endswith(".webp"):
         print(f"Failed to find {request.path}")
         return send_from_directory(config["main"]["cache"], "StupidMissingImage.webp")
+    return jsonify({"error": "Not found"}), 404
 
 
 @app.route("/image/<timestamp>")
@@ -188,6 +189,7 @@ def refresh_data():
         global WORK_SESSIONS
         global WORK_SESSIONS_SUMMARY
         WORK_SESSIONS, WORK_SESSIONS_SUMMARY = loadData()
+        return "", 204  # No Content
     finally:
         WORK_DATA_LOCK.release()
 
@@ -205,4 +207,4 @@ def shutdown_server():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8081, threaded=True, debug=False)
+    app.run(host="0.0.0.0", port=8080, threaded=True, debug=False)
